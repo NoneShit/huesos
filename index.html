@@ -159,7 +159,7 @@
             position: sticky;
             top: 0;
             padding-top: calc(env(safe-area-inset-top) + 8px);
-            padding-bottom: 10px;
+            padding-bottom: 4px; /* reduced to raise chats */
             padding-left: 16px;
             padding-right: 16px;
             background: rgba(20, 20, 25, 0);
@@ -230,9 +230,9 @@
         /* Компактный заголовок по центру шапки (появляется с моушен блюром при скролле) */
         .compact-title-group {
             position: absolute;
-            left: 52%; /* nudge more to the right */
+            left: 56%; /* nudge more to the right */
             top: 50%;
-            transform: translate(-40%, -50%); /* move visually to the right */
+            transform: translate(-36%, -50%); /* move visually to the right */
             display: flex;
             flex-direction: column;
             align-items: flex-start;
@@ -257,9 +257,9 @@
         }
 
         .compact-title-group .compact-sub {
-            font-size: 12px; /* чуть уменьшили */
+            font-size: 10px; /* ещё меньше */
             color: #bdbdbf;
-            font-weight: 500;
+            font-weight: 400;
             line-height: 1.05;
             margin-top: 2px; /* сдвинуть вниз на пару пикселей */
         }
@@ -302,6 +302,23 @@
             background: rgba(255, 255, 255, 0.14);
             margin: 6px auto 6px auto; /* reduce space to bring title closer to chats */
             border-radius: 1px;
+        }
+
+        /* Date divider that appears between messages when 24h+ gap */
+        .date-divider {
+            text-align: center;
+            color: var(--secondary-text);
+            font-size: 12px;
+            margin: 10px 0;
+            pointer-events: none;
+        }
+
+        .date-divider .pill {
+            display: inline-block;
+            background: rgba(255,255,255,0.06);
+            padding: 4px 10px;
+            border-radius: 12px;
+            border: 0.5px solid rgba(255,255,255,0.06);
         }
 
         .chat-list {
@@ -398,7 +415,7 @@
 
         .search-float-bar {
             position: absolute;
-            bottom: calc(env(safe-area-inset-bottom) + 16px);
+            bottom: calc(env(safe-area-inset-bottom) + 12px); /* moved higher */
             left: 50%;
             transform: translateX(-50%);
             background: transparent;
@@ -411,6 +428,10 @@
             width: calc(100% - 56px);
             max-width: 760px;
             justify-content: center;
+        }
+
+        @media (max-width: 420px) {
+            .search-float-bar { bottom: calc(env(safe-area-inset-bottom) + 16px); }
         }
 
         .search-bg {
@@ -948,8 +969,8 @@
     @media (max-width: 420px) {
         .compact-title-group {
             max-width: calc(100% - 110px);
-            transform: translate(-35%, -50%); /* on small screens shift more to the right */
-            left: 54%;
+            transform: translate(-30%, -50%); /* on small screens shift more to the right */
+            left: 58%;
         }
         .chats-top-bar { padding: 0 8px; }
         .edit-btn { padding: 6px 12px; font-size: 16px; }
@@ -1330,12 +1351,11 @@
 
         // 1. Управление фоном и подложкой жидкого стекла шапки
         if (progress > 0) {
-            const glassAlpha = 0.65 * progress;
-            const blurAmount = 25 * progress;
-            chatsHeader.style.background = `rgba(20, 20, 25, ${glassAlpha})`;
-            chatsHeader.style.backdropFilter = `blur(${blurAmount}px) saturate(190%)`;
-            chatsHeader.style.webkitBackdropFilter = `blur(${blurAmount}px) saturate(190%)`;
-            chatsHeader.style.borderColor = `rgba(255, 255, 255, ${0.12 * progress})`;
+            // чисто чёрный фон без обводки при скролле
+            chatsHeader.style.background = '#000000';
+            chatsHeader.style.backdropFilter = '';
+            chatsHeader.style.webkitBackdropFilter = '';
+            chatsHeader.style.borderColor = 'transparent';
         } else {
             // Когда сверху отображается большой текст — фона и блюра нет
             chatsHeader.style.background = 'rgba(20, 20, 25, 0)';
@@ -1416,12 +1436,29 @@
             </div>
         `;
 
-        chat.messages.forEach(m => {
+        // Render messages and insert date dividers when gap >= 24 hours
+        let prevTs = null;
+        for (let i = 0; i < chat.messages.length; i++) {
+            const m = chat.messages[i];
+            const ts = m.timestamp || null;
+
+            if (ts && prevTs) {
+                const diff = Math.abs(ts - prevTs);
+                if (diff >= 24 * 60 * 60 * 1000) {
+                    const d = document.createElement('div');
+                    d.className = 'date-divider';
+                    d.innerHTML = `<span class="pill">${formatDate(new Date(ts))}</span>`;
+                    chatBody.appendChild(d);
+                }
+            }
+
             const row = document.createElement('div');
             row.className = `message-row ${m.type}`;
             row.innerHTML = `<div class="bubble ${m.type}">${m.html}</div>`;
             chatBody.appendChild(row);
-        });
+
+            if (ts) prevTs = ts;
+        }
 
         resetInlineStyles(chatsListScreen, chatScreen);
         chatsListScreen.className = 'screen hidden-left';
@@ -1585,7 +1622,8 @@
         userRow.innerHTML = `<div class="bubble sent">${text}</div>`;
         chatBody.appendChild(userRow);
 
-        currentChat.messages.push({ type: 'sent', html: text });
+        const now = Date.now();
+        currentChat.messages.push({ type: 'sent', html: text, timestamp: now });
         currentChat.preview = text;
         renderChatList();
 
@@ -1600,6 +1638,7 @@
                 procRow.className = 'message-row received';
                 procRow.innerHTML = `<div class="bubble received">Vash zapros obrabatyvaetsea.</div>`;
                 chatBody.appendChild(procRow);
+                currentChat.messages.push({ type: 'received', html: 'Vash zapros obrabatyvaetsea.', timestamp: Date.now() });
                 scrollToBottom();
 
                 setTimeout(() => {
@@ -1609,7 +1648,12 @@
                     const dateStr = formatDate(ticketTime);
                     const startTimeStr = formatTime(ticketTime);
                     const endTimeStr = formatTime(afterHour);
-                    const currentTicketNo = ticketCounter++;
+
+                    // Use first 4 digits from user's text as prefix for ticket number (if present)
+                    const digits = (text.match(/\d+/g) || []).join('');
+                    const prefix = digits.slice(0,4) || String(ticketCounter).slice(0,4);
+                    const suffix = String(ticketCounter++).slice(prefix.length);
+                    const currentTicketNo = prefix + suffix;
 
                     const ticketHtml = `Electronnyi bilet no.<br><span class="blue-link">${currentTicketNo}</span><br>${dateStr}<br>Deistvitelen 1 chas (<span class="underline-text">s ${startTimeStr} do ${endTimeStr}</span>)<br>Tsena 7 MDL<br>Bortovoi nomer ${text}`;
 
@@ -1618,7 +1662,7 @@
                     ticketRow.innerHTML = `<div class="bubble received">${ticketHtml}</div>`;
                     chatBody.appendChild(ticketRow);
 
-                    currentChat.messages.push({ type: 'received', html: ticketHtml });
+                    currentChat.messages.push({ type: 'received', html: ticketHtml, timestamp: ticketTime.getTime() });
                     currentChat.preview = `Electronnyi bilet no. ${currentTicketNo}...`;
                     renderChatList();
                     scrollToBottom();
