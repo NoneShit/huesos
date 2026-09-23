@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Сообщения</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    * {
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    body, html {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      background-color: #000000;
+      color: #ffffff;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", Arial, sans-serif;
+      overflow: hidden;
+    }
+
+    /* iOS Message Bubbles */
+    .bubble-outgoing {
+      background-color: #34c759;
+      color: #ffffff;
+      border-radius: 18px 18px 4px 18px;
+      position: relative;
+    }
+
+    .bubble-incoming {
+      background-color: #252528;
+      color: #ffffff;
+      border-radius: 18px 18px 18px 4px;
+      position: relative;
+    }
+
+    /* Bubble tails */
+    .bubble-outgoing::after {
+      content: "";
+      position: absolute;
+      bottom: 0;
+      right: -5px;
+      width: 10px;
+      height: 12px;
+      background-color: #34c759;
+      border-bottom-left-radius: 10px;
+      clip-path: polygon(0 0, 0% 100%, 100% 100%);
+    }
+
+    .bubble-incoming::after {
+      content: "";
+      position: absolute;
+      bottom: 0;
+      left: -5px;
+      width: 10px;
+      height: 12px;
+      background-color: #252528;
+      border-bottom-right-radius: 10px;
+      clip-path: polygon(100% 0, 0 100%, 100% 100%);
+    }
+
+    .ticket-link {
+      color: #2982ff;
+      text-decoration: underline;
+    }
+
+    .time-underline {
+      text-decoration: underline;
+    }
+
+    ::-webkit-scrollbar {
+      width: 0px;
+      background: transparent;
+    }
+
+    .ios-input-bg {
+      background-color: #1c1c1e;
+      border: 1px solid #2c2c2e;
+    }
+  </style>
+</head>
+<body class="bg-black text-white antialiased">
+  <div class="w-full h-full flex flex-col justify-between bg-black relative">
+    
+    <!-- Header (Pure iOS Messages Header) -->
+    <header class="pt-3 px-4 pb-2 bg-black/95 backdrop-blur-md sticky top-0 z-50 border-b border-zinc-900/60">
+      <div class="relative flex items-center justify-between">
+        <!-- Back Button -->
+        <button class="flex items-center text-[#0a84ff] text-base focus:outline-none">
+          <i class="fa-solid fa-chevron-left text-lg pr-1.5 font-bold"></i>
+          <span class="bg-[#2c2c2e] text-white text-[13px] font-medium px-2 py-0.5 rounded-full min-w-[28px] text-center">248</span>
+        </button>
+
+        <!-- Avatar & Contact Name -->
+        <div class="flex flex-col items-center">
+          <div class="w-10 h-10 rounded-full bg-gradient-to-b from-[#8e8e93] to-[#48484a] flex items-center justify-center shadow-inner">
+            <i class="fa-solid fa-user text-xl text-white/90"></i>
+          </div>
+          <div class="flex items-center space-x-1 mt-0.5">
+            <span class="text-[14px] font-semibold tracking-tight">7000</span>
+            <i class="fa-solid fa-chevron-right text-[9px] text-zinc-500"></i>
+          </div>
+        </div>
+
+        <!-- Spacer for centering avatar -->
+        <div class="w-12"></div>
+      </div>
+    </header>
+
+    <!-- Chat Messages Scroll Container -->
+    <main id="chat-container" class="flex-1 overflow-y-auto px-3 py-3 space-y-2.5 flex flex-col">
+      <!-- Timestamp Header -->
+      <div class="text-center my-1.5">
+        <p class="text-[11px] text-zinc-500 font-medium">Текстовое сообщение • SMS</p>
+        <p id="chat-date-header" class="text-[11px] text-zinc-500 font-medium">22 июня 2025 г., 18:39</p>
+      </div>
+
+      <!-- Initial Ticket Message Example (Matches image layout) -->
+      <div class="flex justify-end mb-0.5">
+        <div class="bubble-outgoing px-3.5 py-1.5 max-w-[75%] text-[15px] leading-snug">
+          2402
+        </div>
+      </div>
+
+      <div class="flex justify-start mb-0.5">
+        <div class="bubble-incoming px-3.5 py-1.5 max-w-[80%] text-[15px] leading-snug">
+          Vash zapros obrabatyvaetsea.
+        </div>
+      </div>
+
+      <div class="flex justify-start mb-2">
+        <div class="bubble-incoming px-3.5 py-2 max-w-[85%] text-[15px] leading-relaxed">
+          Electronnyi bilet no.<br>
+          <span class="ticket-link">24027493</span><br>
+          22.06.2025<br>
+          Deistvitelen 1 chas (<span class="time-underline">s 18:39 do 19:39</span>)<br>
+          Tsena 7 MDL<br>
+          Bortovoi nomer 2402
+        </div>
+      </div>
+    </main>
+
+    <!-- Input Bar -->
+    <footer class="p-2 pb-5 bg-black border-t border-zinc-900/80 flex items-center space-x-2">
+      <button class="w-8 h-8 rounded-full bg-[#1c1c1e] text-zinc-400 flex items-center justify-center hover:text-white transition">
+        <i class="fa-solid fa-plus text-base"></i>
+      </button>
+
+      <!-- Text Input Field -->
+      <div class="flex-1 ios-input-bg rounded-full flex items-center px-3.5 py-1.5">
+        <input 
+          type="text" 
+          id="message-input" 
+          placeholder="Текстовое сообщение • SMS" 
+          class="bg-transparent w-full text-white placeholder-zinc-500 text-[15px] focus:outline-none"
+          inputmode="numeric"
+          autocomplete="off"
+        >
+        <button id="mic-btn" class="text-zinc-500 ml-1">
+          <i class="fa-solid fa-microphone text-sm"></i>
+        </button>
+      </div>
+
+      <!-- Send Button -->
+      <button id="send-btn" class="w-8 h-8 rounded-full bg-[#34c759] text-white flex items-center justify-center opacity-50 cursor-not-allowed transition" disabled>
+        <i class="fa-solid fa-arrow-up text-sm font-bold"></i>
+      </button>
+    </footer>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const chatContainer = document.getElementById('chat-container');
+      const messageInput = document.getElementById('message-input');
+      const sendBtn = document.getElementById('send-btn');
+      const chatDateHeader = document.getElementById('chat-date-header');
+
+      // Set formatted Date Header
+      function setInitialDateHeader() {
+        const now = new Date();
+        const months = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'];
+        const day = now.getDate();
+        const month = months[now.getMonth()];
+        const year = now.getFullYear();
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        chatDateHeader.textContent = `${day} ${month} ${year} г., ${hours}:${minutes}`;
+      }
+      setInitialDateHeader();
+
+      // Enable / Disable Send Button
+      messageInput.addEventListener('input', () => {
+        const val = messageInput.value.trim();
+        if (val.length > 0) {
+          sendBtn.disabled = false;
+          sendBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+          sendBtn.classList.add('opacity-100');
+        } else {
+          sendBtn.disabled = true;
+          sendBtn.classList.add('opacity-50', 'cursor-not-allowed');
+          sendBtn.classList.remove('opacity-100');
+        }
+      });
+
+      // Handle Message Submit
+      function handleSend() {
+        const code = messageInput.value.trim();
+        if (!code) return;
+
+        // 1. Add User's Message
+        appendOutgoingMessage(code);
+        messageInput.value = '';
+        sendBtn.disabled = true;
+        sendBtn.classList.add('opacity-50', 'cursor-not-allowed');
+
+        scrollToBottom();
+
+        // 2. Immediate Reply "Vash zapros obrabatyvaetsea."
+        setTimeout(() => {
+          appendIncomingMessage('Vash zapros obrabatyvaetsea.');
+          scrollToBottom();
+
+          // 3. Second Reply: Ticket Details (after ~1 sec delay)
+          setTimeout(() => {
+            const ticketHTML = generateTicketHTML(code);
+            appendIncomingMessage(ticketHTML, true);
+            scrollToBottom();
+          }, 800);
+
+        }, 300);
+      }
+
+      sendBtn.addEventListener('click', handleSend);
+      messageInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          handleSend();
+        }
+      });
+
+      function appendOutgoingMessage(text) {
+        const wrap = document.createElement('div');
+        wrap.className = 'flex justify-end mb-1';
+        wrap.innerHTML = `
+          <div class="bubble-outgoing px-3.5 py-1.5 max-w-[75%] text-[15px] leading-snug">
+            ${escapeHTML(text)}
+          </div>
+        `;
+        chatContainer.appendChild(wrap);
+      }
+
+      function appendIncomingMessage(content, isHTML = false) {
+        const wrap = document.createElement('div');
+        wrap.className = 'flex justify-start mb-1';
+        wrap.innerHTML = `
+          <div class="bubble-incoming px-3.5 ${isHTML ? 'py-2 max-w-[85%] leading-relaxed' : 'py-1.5 max-w-[80%] leading-snug'} text-[15px]">
+            ${isHTML ? content : escapeHTML(content)}
+          </div>
+        `;
+        chatContainer.appendChild(wrap);
+      }
+
+      // Ticket Generator with 7 MDL price and calculated times
+      function generateTicketHTML(bortovoiCode) {
+        const now = new Date();
+        
+        // Random 8-digit ticket number (starting with code if numeric)
+        const ticketNo = bortovoiCode + String(Math.floor(1000 + Math.random() * 9000));
+        
+        // Date DD.MM.YYYY
+        const day = String(now.getDate()).padStart(2, '0');
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const year = now.getFullYear();
+        const formattedDate = `${day}.${month}.${year}`;
+
+        // Time calculations (1 hour period)
+        const startHours = String(now.getHours()).padStart(2, '0');
+        const startMinutes = String(now.getMinutes()).padStart(2, '0');
+
+        const expiryDate = new Date(now.getTime() + 60 * 60 * 1000);
+        const endHours = String(expiryDate.getHours()).padStart(2, '0');
+        const endMinutes = String(expiryDate.getMinutes()).padStart(2, '0');
+
+        return `
+          Electronnyi bilet no.<br>
+          <span class="ticket-link">${ticketNo}</span><br>
+          ${formattedDate}<br>
+          Deistvitelen 1 chas (<span class="time-underline">s ${startHours}:${startMinutes} do ${endHours}:${endMinutes}</span>)<br>
+          Tsena 7 MDL<br>
+          Bortovoi nomer ${escapeHTML(bortovoiCode)}
+        `;
+      }
+
+      function scrollToBottom() {
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+      }
+
+      function escapeHTML(str) {
+        return str.replace(/[&<>'"]/g, 
+          tag => ({
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            "'": '&#39;',
+            '"': '&quot;'
+          }[tag] || tag)
+        );
+      }
+
+      scrollToBottom();
+    });
+  </script>
+</body>
+</html>
