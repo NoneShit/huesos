@@ -1,457 +1,1146 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>Сообщения</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <style>
-    * {
-      -webkit-tap-highlight-color: transparent;
-      user-select: none;
-      box-sizing: border-box;
-    }
-
-    /* Fixed full screen app layout using dynamic viewport units */
-    html, body {
-      margin: 0;
-      padding: 0;
-      width: 100%;
-      height: 100%;
-      height: 100dvh;
-      background-color: #000000;
-      color: #ffffff;
-      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", Arial, sans-serif;
-      overflow: hidden;
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-    }
-
-    /* iOS Message Bubbles */
-    .bubble-outgoing {
-      background-color: #34c759;
-      color: #ffffff;
-      border-radius: 18px 18px 4px 18px;
-      position: relative;
-    }
-
-    .bubble-incoming {
-      background-color: #252528;
-      color: #ffffff;
-      border-radius: 18px 18px 18px 4px;
-      position: relative;
-    }
-
-    /* Bubble tails */
-    .bubble-outgoing::after {
-      content: "";
-      position: absolute;
-      bottom: 0;
-      right: -5px;
-      width: 10px;
-      height: 12px;
-      background-color: #34c759;
-      border-bottom-left-radius: 10px;
-      clip-path: polygon(0 0, 0% 100%, 100% 100%);
-    }
-
-    .bubble-incoming::after {
-      content: "";
-      position: absolute;
-      bottom: 0;
-      left: -5px;
-      width: 10px;
-      height: 12px;
-      background-color: #252528;
-      border-bottom-right-radius: 10px;
-      clip-path: polygon(100% 0, 0 100%, 100% 100%);
-    }
-
-    .ticket-link {
-      color: #2982ff;
-      text-decoration: underline;
-    }
-
-    .time-underline {
-      text-decoration: underline;
-    }
-
-    ::-webkit-scrollbar {
-      width: 0px;
-      background: transparent;
-    }
-
-    .ios-input-bg {
-      background-color: #1c1c1e;
-      border: 1px solid #2c2c2e;
-    }
-
-    /* Animated Typing Indicator Dots */
-    .typing-dot {
-      width: 7px;
-      height: 7px;
-      background-color: #8e8e93;
-      border-radius: 50%;
-      display: inline-block;
-      animation: typingBounce 1.4s infinite ease-in-out both;
-    }
-
-    .typing-dot:nth-child(1) { animation-delay: 0s; }
-    .typing-dot:nth-child(2) { animation-delay: 0.2s; }
-    .typing-dot:nth-child(3) { animation-delay: 0.4s; }
-
-    @keyframes typingBounce {
-      0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
-      40% { transform: scale(1.1); opacity: 1; }
-    }
-
-    /* Modal slide up animation */
-    .modal-slide-enter {
-      transform: translateY(100%);
-      transition: transform 0.28s cubic-bezier(0.32, 0.72, 0, 1);
-    }
-    .modal-slide-active {
-      transform: translateY(0%);
-    }
-  </style>
-</head>
-<body class="bg-black text-white antialiased">
-  <div class="w-full h-full flex flex-col justify-between bg-black relative overflow-hidden">
-    
-    <!-- Fixed Top Header (Does not scroll or collapse when keyboard opens) -->
-    <header class="pt-3 px-4 pb-2.5 bg-black/95 backdrop-blur-md shrink-0 z-40 border-b border-zinc-900/80 select-none">
-      <div class="relative flex items-center justify-between">
-        <!-- Back Button with Unread Badge -->
-        <button class="flex items-center text-[#0a84ff] text-base focus:outline-none active:opacity-60">
-          <i class="fa-solid fa-chevron-left text-lg pr-1.5 font-bold"></i>
-          <span class="bg-[#2c2c2e] text-white text-[13px] font-medium px-2 py-0.5 rounded-full min-w-[28px] text-center">248</span>
-        </button>
-
-        <!-- Clickable Contact Info Header -->
-        <div id="contact-header-btn" class="flex flex-col items-center cursor-pointer active:opacity-70 transition">
-          <div class="w-10 h-10 rounded-full bg-gradient-to-b from-[#8e8e93] to-[#48484a] flex items-center justify-center shadow-inner">
-            <i class="fa-solid fa-user text-xl text-white/90"></i>
-          </div>
-          <div class="flex items-center space-x-1 mt-0.5">
-            <span class="text-[14px] font-semibold tracking-tight">7000</span>
-            <i class="fa-solid fa-chevron-right text-[9px] text-zinc-500"></i>
-          </div>
-        </div>
-
-        <!-- Right Spacer -->
-        <div class="w-12"></div>
-      </div>
-    </header>
-
-    <!-- Scrollable Chat Area -->
-    <main id="chat-container" class="flex-1 overflow-y-auto px-3 py-3 space-y-2.5 flex flex-col">
-      <!-- Timestamp Header -->
-      <div class="text-center my-1.5 shrink-0">
-        <p class="text-[11px] text-zinc-500 font-medium">Текстовое сообщение • SMS</p>
-        <p id="chat-date-header" class="text-[11px] text-zinc-500 font-medium">22 июня 2025 г., 18:39</p>
-      </div>
-
-      <!-- Sample Historical Messages -->
-      <div class="flex justify-end mb-0.5">
-        <div class="bubble-outgoing px-3.5 py-1.5 max-w-[75%] text-[15px] leading-snug">
-          2402
-        </div>
-      </div>
-
-      <div class="flex justify-start mb-0.5">
-        <div class="bubble-incoming px-3.5 py-1.5 max-w-[80%] text-[15px] leading-snug">
-          Vash zapros obrabatyvaetsea.
-        </div>
-      </div>
-
-      <div class="flex justify-start mb-2">
-        <div class="bubble-incoming px-3.5 py-2 max-w-[85%] text-[15px] leading-relaxed">
-          Electronnyi bilet no.<br>
-          <span class="ticket-link">24027493</span><br>
-          22.06.2025<br>
-          Deistvitelen 1 chas (<span class="time-underline">s 18:39 do 19:39</span>)<br>
-          Tsena 7 MDL<br>
-          Bortovoi nomer 2402
-        </div>
-      </div>
-    </main>
-
-    <!-- Fixed Bottom Message Input Bar -->
-    <footer class="p-2 pb-5 bg-black border-t border-zinc-900/80 shrink-0 z-40 flex items-center space-x-2">
-      <button class="w-8 h-8 rounded-full bg-[#1c1c1e] text-zinc-400 flex items-center justify-center active:bg-zinc-800 transition">
-        <i class="fa-solid fa-plus text-base"></i>
-      </button>
-
-      <!-- Input Field Container -->
-      <div class="flex-1 ios-input-bg rounded-full flex items-center px-3.5 py-1.5">
-        <input 
-          type="text" 
-          id="message-input" 
-          placeholder="Текстовое сообщение • SMS" 
-          class="bg-transparent w-full text-white placeholder-zinc-500 text-[15px] focus:outline-none"
-          inputmode="numeric"
-          autocomplete="off"
-        >
-        <button id="mic-btn" class="text-zinc-500 ml-1">
-          <i class="fa-solid fa-microphone text-sm"></i>
-        </button>
-      </div>
-
-      <!-- Send Button -->
-      <button id="send-btn" class="w-8 h-8 rounded-full bg-[#34c759] text-white flex items-center justify-center opacity-50 cursor-not-allowed transition active:scale-95" disabled>
-        <i class="fa-solid fa-arrow-up text-sm font-bold"></i>
-      </button>
-    </footer>
-  </div>
-
-  <!-- iOS Contact Info View Overlay Modal -->
-  <div id="contact-modal" class="fixed inset-0 bg-black z-50 modal-slide-enter flex flex-col hidden">
-    <!-- Contact Navigation Header -->
-    <div class="px-4 py-3 flex items-center justify-between border-b border-zinc-800 bg-[#1c1c1e]/90 backdrop-blur-md">
-      <span class="w-16"></span>
-      <span class="text-[17px] font-semibold text-white">Контакты</span>
-      <button id="close-modal-btn" class="text-[#0a84ff] font-semibold text-[17px] w-16 text-right focus:outline-none active:opacity-60">
-        Готово
-      </button>
-    </div>
-
-    <!-- Contact Details Content -->
-    <div class="flex-1 overflow-y-auto px-4 py-6 flex flex-col items-center">
-      <!-- Contact Large Avatar -->
-      <div class="w-24 h-24 rounded-full bg-gradient-to-b from-[#8e8e93] to-[#48484a] flex items-center justify-center shadow-lg mb-3">
-        <i class="fa-solid fa-user text-5xl text-white/90"></i>
-      </div>
-
-      <!-- Contact Name -->
-      <h2 class="text-2xl font-bold text-white mb-6">7000</h2>
-
-      <!-- Quick Action Buttons Row -->
-      <div class="grid grid-cols-4 gap-3 w-full max-w-sm mb-6">
-        <div class="flex flex-col items-center bg-[#1c1c1e] p-2.5 rounded-xl border border-zinc-800/80 active:bg-zinc-800 transition">
-          <i class="fa-solid fa-comment text-[#0a84ff] text-xl mb-1"></i>
-          <span class="text-[11px] text-[#0a84ff]">сообщение</span>
-        </div>
-        <div class="flex flex-col items-center bg-[#1c1c1e] p-2.5 rounded-xl border border-zinc-800/80 active:bg-zinc-800 transition">
-          <i class="fa-solid fa-phone text-[#0a84ff] text-xl mb-1"></i>
-          <span class="text-[11px] text-[#0a84ff]">сотовый</span>
-        </div>
-        <div class="flex flex-col items-center bg-[#1c1c1e] p-2.5 rounded-xl border border-zinc-800/80 opacity-50">
-          <i class="fa-solid fa-video text-zinc-500 text-xl mb-1"></i>
-          <span class="text-[11px] text-zinc-500">видео</span>
-        </div>
-        <div class="flex flex-col items-center bg-[#1c1c1e] p-2.5 rounded-xl border border-zinc-800/80 opacity-50">
-          <i class="fa-solid fa-envelope text-zinc-500 text-xl mb-1"></i>
-          <span class="text-[11px] text-zinc-500">почта</span>
-        </div>
-      </div>
-
-      <!-- Phone Number Card -->
-      <div class="w-full max-w-sm bg-[#1c1c1e] rounded-xl p-3.5 border border-zinc-800/80 mb-4">
-        <p class="text-[12px] text-zinc-400 mb-0.5">сотовый</p>
-        <p class="text-[17px] text-[#0a84ff] font-normal">7000</p>
-      </div>
-
-      <!-- Additional Options -->
-      <div class="w-full max-w-sm bg-[#1c1c1e] rounded-xl border border-zinc-800/80 divide-y divide-zinc-800">
-        <div class="p-3.5 text-[#0a84ff] text-[15px]">Поделиться контактом</div>
-        <div class="p-3.5 text-[#0a84ff] text-[15px]">Добавить в избранное</div>
-        <div class="p-3.5 text-[#ff453a] text-[15px]">Заблокировать абонента</div>
-      </div>
-    </div>
-  </div>
-
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      const chatContainer = document.getElementById('chat-container');
-      const messageInput = document.getElementById('message-input');
-      const sendBtn = document.getElementById('send-btn');
-      const chatDateHeader = document.getElementById('chat-date-header');
-      const contactHeaderBtn = document.getElementById('contact-header-btn');
-      const contactModal = document.getElementById('contact-modal');
-      const closeModalBtn = document.getElementById('close-modal-btn');
-
-      // 1. Initialize Date Header
-      function setInitialDateHeader() {
-        const now = new Date();
-        const months = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'];
-        const day = now.getDate();
-        const month = months[now.getMonth()];
-        const year = now.getFullYear();
-        const hours = String(now.getHours()).padStart(2, '0');
-        const minutes = String(now.getMinutes()).padStart(2, '0');
-        chatDateHeader.textContent = `${day} ${month} ${year} г., ${hours}:${minutes}`;
-      }
-      setInitialDateHeader();
-
-      // 2. Enable / Disable Send Button
-      messageInput.addEventListener('input', () => {
-        const val = messageInput.value.trim();
-        if (val.length > 0) {
-          sendBtn.disabled = false;
-          sendBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-          sendBtn.classList.add('opacity-100');
-        } else {
-          sendBtn.disabled = true;
-          sendBtn.classList.add('opacity-50', 'cursor-not-allowed');
-          sendBtn.classList.remove('opacity-100');
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Сообщения</title>
+    <!-- Иконка iMessage -->
+    <link rel="icon" type="image/svg+xml" href="https://upload.wikimedia.org/wikipedia/commons/5/51/IMessage_logo.svg">
+    <link rel="apple-touch-icon" href="https://upload.wikimedia.org/wikipedia/commons/5/51/IMessage_logo.svg">
+    <style>
+        :root {
+            --bg-color: #000000;
+            --bubble-sent: #34c759;
+            --bubble-received: #26252a;
+            --text-color: #ffffff;
+            --secondary-text: #8e8e93;
+            --link-blue: #2997ff;
+            --card-bg: #1c1c1e;
+            --red-color: #ff3b30;
         }
-      });
 
-      // 3. Contact Profile Modal Toggle
-      contactHeaderBtn.addEventListener('click', () => {
-        contactModal.classList.remove('hidden');
-        setTimeout(() => {
-          contactModal.classList.add('modal-slide-active');
-        }, 10);
-      });
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
+            user-select: none;
+        }
 
-      closeModalBtn.addEventListener('click', () => {
-        contactModal.classList.remove('modal-slide-active');
-        setTimeout(() => {
-          contactModal.classList.add('hidden');
-        }, 280);
-      });
+        /* Скрытие скроллбаров везде */
+        ::-webkit-scrollbar {
+            display: none !important;
+            width: 0 !important;
+            height: 0 !important;
+        }
+        * {
+            scrollbar-width: none !important;
+            -ms-overflow-style: none !important;
+        }
 
-      // 4. Handle Message Send with Typing Animation Effect
-      function handleSend() {
-        const code = messageInput.value.trim();
+        body, html {
+            width: 100%;
+            height: 100%;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            overflow: hidden;
+            position: fixed;
+        }
+
+        .app-container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            height: 100dvh;
+            width: 100%;
+            max-width: 440px;
+            margin: 0 auto;
+            position: relative;
+            background: #000000;
+            overflow: hidden;
+        }
+
+        /* Экраны */
+        .screen {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            background: #000000;
+            transition: transform 0.38s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.38s ease;
+            z-index: 1;
+            width: 100%;
+            height: 100%;
+        }
+
+        .screen.hidden-left {
+            transform: translateX(-30%);
+            opacity: 0.8;
+            pointer-events: none;
+        }
+
+        .screen.hidden-right {
+            transform: translateX(100%);
+            pointer-events: none;
+        }
+
+        .screen.active {
+            transform: translateX(0);
+            opacity: 1;
+            z-index: 10;
+            pointer-events: auto;
+        }
+
+        /* --- 1. ЭКРАН СПИСКА ЧАТОВ --- */
+        .chats-header {
+            padding: calc(env(safe-area-inset-top) + 12px) 16px 8px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            z-index: 5;
+        }
+
+        .chats-top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .edit-btn {
+            color: var(--link-blue);
+            font-size: 17px;
+            cursor: pointer;
+        }
+
+        .filter-btn {
+            width: 32px;
+            height: 32px;
+            background: #1c1c1e;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .filter-btn svg {
+            width: 18px;
+            height: 18px;
+            fill: #ffffff;
+        }
+
+        .chats-title {
+            font-size: 32px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .icloud-status {
+            font-size: 13px;
+            color: var(--secondary-text);
+            margin-bottom: 4px;
+        }
+
+        .chat-list {
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            padding-bottom: 80px;
+        }
+
+        .chat-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 16px;
+            gap: 12px;
+            cursor: pointer;
+            position: relative;
+            active-background: #1c1c1e;
+        }
+
+        .chat-item:active {
+            background-color: #121214;
+        }
+
+        .unread-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: #0a84ff;
+            flex-shrink: 0;
+            margin-left: -12px;
+            opacity: 0;
+        }
+
+        .unread-dot.active {
+            opacity: 1;
+        }
+
+        .chat-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: linear-gradient(180deg, #686976 0%, #3a3a44 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            overflow: hidden;
+        }
+
+        .chat-avatar svg {
+            width: 28px;
+            height: 28px;
+            fill: #ffffff;
+        }
+
+        .chat-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .chat-details {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            border-bottom: 0.5px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 10px;
+            min-width: 0;
+        }
+
+        .chat-header-line {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chat-name-group {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .chat-time-group {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            color: var(--secondary-text);
+            font-size: 14px;
+        }
+
+        .chat-time-group svg {
+            width: 7px;
+            height: 11px;
+            fill: none;
+            stroke: var(--secondary-text);
+            stroke-width: 2;
+        }
+
+        .chat-preview {
+            color: var(--secondary-text);
+            font-size: 14px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            line-height: 1.3;
+        }
+
+        .search-float-bar {
+            position: absolute;
+            bottom: calc(env(safe-area-inset-bottom) + 16px);
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(28, 28, 30, 0.88);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 25px;
+            padding: 8px 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border: 0.5px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+            z-index: 10;
+            width: calc(100% - 32px);
+        }
+
+        .search-float-bar svg {
+            width: 16px;
+            height: 16px;
+            fill: var(--secondary-text);
+        }
+
+        .search-float-bar input {
+            background: transparent;
+            border: none;
+            outline: none;
+            color: #ffffff;
+            font-size: 15px;
+            flex: 1;
+        }
+
+        /* --- 2. ЭКРАН ЧАТА --- */
+        .chat-header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            padding-top: calc(env(safe-area-inset-top) + 8px);
+            padding-bottom: 10px;
+            border-bottom: 0.5px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .header-top {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 12px;
+        }
+
+        .back-btn {
+            display: flex;
+            align-items: center;
+            gap: 2px;
+            color: var(--link-blue);
+            cursor: pointer;
+        }
+
+        .back-btn svg {
+            width: 12px;
+            height: 20px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2.5;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .badge {
+            background: #2c2c2e;
+            color: #ffffff;
+            font-size: 13px;
+            font-weight: 500;
+            padding: 2px 7px;
+            border-radius: 12px;
+            margin-left: 2px;
+        }
+
+        .contact-trigger {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .contact-avatar-small {
+            width: 46px;
+            height: 46px;
+            border-radius: 50%;
+            background: linear-gradient(180deg, #686976 0%, #3a3a44 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 4px;
+        }
+
+        .contact-avatar-small svg {
+            width: 26px;
+            height: 26px;
+            fill: #ffffff;
+        }
+
+        .contact-name-small {
+            font-size: 13px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 3px;
+        }
+
+        .contact-name-small svg {
+            width: 6px;
+            height: 10px;
+            fill: none;
+            stroke: #8e8e93;
+            stroke-width: 2;
+        }
+
+        .chat-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .meta-info {
+            text-align: center;
+            margin-top: 4px;
+            margin-bottom: 6px;
+        }
+
+        .meta-text {
+            color: var(--secondary-text);
+            font-size: 11px;
+        }
+
+        /* Эластичная анимация появления сообщений */
+        .message-row {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            animation: springPop 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transform-origin: bottom right;
+        }
+
+        .message-row.received {
+            transform-origin: bottom left;
+        }
+
+        @keyframes springPop {
+            0% {
+                opacity: 0;
+                transform: scale(0.6) translateY(20px);
+            }
+            70% {
+                transform: scale(1.03) translateY(-2px);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        .message-row.sent { align-items: flex-end; }
+        .message-row.received { align-items: flex-start; }
+
+        .bubble {
+            max-width: 78%;
+            padding: 8px 13px;
+            border-radius: 18px;
+            font-size: 15px;
+            line-height: 1.32;
+            letter-spacing: -0.2px;
+            word-wrap: break-word;
+            white-space: pre-line;
+        }
+
+        .bubble.sent {
+            background-color: var(--bubble-sent);
+            color: #ffffff;
+            border-bottom-right-radius: 4px;
+        }
+
+        .bubble.received {
+            background-color: var(--bubble-received);
+            color: #ffffff;
+            border-bottom-left-radius: 4px;
+        }
+
+        .blue-link { color: var(--link-blue); text-decoration: underline; }
+        .underline-text { text-decoration: underline; }
+
+        .input-bar {
+            padding: 8px 10px calc(env(safe-area-inset-bottom) + 8px) 10px;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-top: 0.5px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .plus-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #2c2c2e;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        .plus-btn svg {
+            width: 16px;
+            height: 16px;
+            fill: none;
+            stroke: #8e8e93;
+            stroke-width: 2.2;
+        }
+
+        .input-container {
+            flex: 1;
+            background: var(--card-bg);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            display: flex;
+            align-items: center;
+            padding: 6px 8px 6px 14px;
+            min-height: 36px;
+        }
+
+        .input-container input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: #ffffff;
+            font-size: 15px;
+        }
+
+        .input-container input::placeholder {
+            color: #636366;
+            font-size: 14px;
+        }
+
+        .mic-btn, .send-btn {
+            width: 26px;
+            height: 26px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        .mic-btn svg { width: 18px; height: 18px; fill: #8e8e93; }
+
+        .send-btn {
+            background: var(--bubble-sent);
+            border-radius: 50%;
+            display: none;
+        }
+
+        .send-btn svg {
+            width: 14px;
+            height: 14px;
+            fill: none;
+            stroke: #ffffff;
+            stroke-width: 2.5;
+        }
+
+        /* --- 3. ЭКРАН ПРОФИЛЯ КОНТАКТА --- */
+        .profile-header {
+            padding: calc(env(safe-area-inset-top) + 12px) 16px 8px 16px;
+            display: flex;
+            align-items: center;
+        }
+
+        .profile-back-btn {
+            width: 32px;
+            height: 32px;
+            background: #1c1c1e;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .profile-back-btn svg {
+            width: 10px;
+            height: 16px;
+            fill: none;
+            stroke: #ffffff;
+            stroke-width: 2.5;
+            stroke-linecap: round;
+        }
+
+        .profile-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px 16px 40px 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .profile-main-avatar {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            background: linear-gradient(180deg, #686976 0%, #3a3a44 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+        }
+
+        .profile-main-avatar svg {
+            width: 52px;
+            height: 52px;
+            fill: #ffffff;
+        }
+
+        .profile-title {
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            margin-top: -6px;
+        }
+
+        .action-buttons-row {
+            display: flex;
+            gap: 12px;
+            width: 100%;
+            justify-content: center;
+            margin-bottom: 6px;
+        }
+
+        .action-circle-btn {
+            width: 52px;
+            height: 52px;
+            background: #1c1c1e;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .action-circle-btn svg {
+            width: 22px;
+            height: 22px;
+            fill: var(--secondary-text);
+        }
+
+        .card-group {
+            width: 100%;
+            background: var(--card-bg);
+            border-radius: 12px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card-row {
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 0.5px solid rgba(255, 255, 255, 0.08);
+            font-size: 16px;
+        }
+
+        .card-row:last-child {
+            border-bottom: none;
+        }
+
+        .card-row-left {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .phone-label {
+            font-size: 13px;
+            color: var(--secondary-text);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .recent-tag {
+            background: #2c2c2e;
+            color: #8e8e93;
+            font-size: 10px;
+            padding: 1px 4px;
+            border-radius: 4px;
+            text-transform: uppercase;
+        }
+
+        .phone-number {
+            font-size: 17px;
+            color: #ffffff;
+            font-weight: 500;
+        }
+
+        .row-blue-text {
+            color: var(--link-blue);
+            cursor: pointer;
+        }
+
+        .row-red-text {
+            color: var(--red-color);
+            cursor: pointer;
+        }
+
+        /* Toggle Switch iOS style */
+        .toggle-switch {
+            width: 51px;
+            height: 31px;
+            background: #3a3a3c;
+            border-radius: 31px;
+            position: relative;
+            cursor: pointer;
+            transition: background 0.25s;
+        }
+
+        .toggle-switch.active {
+            background: #34c759;
+        }
+
+        .toggle-handle {
+            width: 27px;
+            height: 27px;
+            background: #ffffff;
+            border-radius: 50%;
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+
+        .toggle-switch.active .toggle-handle {
+            transform: translateX(20px);
+        }
+
+        .encryption-note {
+            font-size: 13px;
+            color: var(--secondary-text);
+            width: 100%;
+            text-align: left;
+            padding: 0 4px;
+        }
+
+        .encryption-note span {
+            color: var(--link-blue);
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+
+    <!-- 1. ЭКРАН СПИСКА ЧАТОВ -->
+    <div class="screen active" id="chatsListScreen">
+        <div class="chats-header">
+            <div class="chats-top-bar">
+                <div class="edit-btn">Изменить</div>
+                <div class="filter-btn">
+                    <svg viewBox="0 0 24 24"><path d="M3 6h18v2H3V6zm4 5h10v2H7v-2zm3 5h4v2h-4v-2z"/></svg>
+                </div>
+            </div>
+            <div class="chats-title">Сообщения</div>
+            <div class="icloud-status">Синхронизация с iCloud приостановлена</div>
+        </div>
+
+        <div class="chat-list">
+            <!-- Orange -->
+            <div class="chat-item">
+                <div class="unread-dot active"></div>
+                <div class="chat-avatar">
+                    <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                </div>
+                <div class="chat-details">
+                    <div class="chat-header-line">
+                        <div class="chat-name-group">Orange</div>
+                        <div class="chat-time-group">понедельник <svg viewBox="0 0 6 10"><path d="M1 1l4 4-4 4"/></svg></div>
+                    </div>
+                    <div class="chat-preview">Srok deistvia optsii 10 GB+150 natsionalinyh minut na 15 dnei istekaet segodnia v 23:59. Akt...</div>
+                </div>
+            </div>
+
+            <!-- 7000 (Active Target Chat) -->
+            <div class="chat-item" id="openChat7000">
+                <div class="unread-dot"></div>
+                <div class="chat-avatar">
+                    <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                </div>
+                <div class="chat-details">
+                    <div class="chat-header-line">
+                        <div class="chat-name-group">7000</div>
+                        <div class="chat-time-group">18:39 <svg viewBox="0 0 6 10"><path d="M1 1l4 4-4 4"/></svg></div>
+                    </div>
+                    <div class="chat-preview">Electronnyi bilet no. 24027494... Tsena 7 MDL</div>
+                </div>
+            </div>
+
+            <!-- 1111 -->
+            <div class="chat-item">
+                <div class="unread-dot active"></div>
+                <div class="chat-avatar">
+                    <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                </div>
+                <div class="chat-details">
+                    <div class="chat-header-line">
+                        <div class="chat-name-group">1111</div>
+                        <div class="chat-time-group">воскресенье <svg viewBox="0 0 6 10"><path d="M1 1l4 4-4 4"/></svg></div>
+                    </div>
+                    <div class="chat-preview">Numarul dvs. a fost reincarcat cu succes cu 67.90 lei. Aveti in cont 75.59 lei. Perioada activ...</div>
+                </div>
+            </div>
+
+            <!-- RunPay -->
+            <div class="chat-item">
+                <div class="unread-dot"></div>
+                <div class="chat-avatar">
+                    <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                </div>
+                <div class="chat-details">
+                    <div class="chat-header-line">
+                        <div class="chat-name-group">RunPay</div>
+                        <div class="chat-time-group">суббота <svg viewBox="0 0 6 10"><path d="M1 1l4 4-4 4"/></svg></div>
+                    </div>
+                    <div class="chat-preview">Runpay verification code: 1488 SessionId: S67695242</div>
+                </div>
+            </div>
+
+            <!-- Telegram -->
+            <div class="chat-item">
+                <div class="unread-dot"></div>
+                <div class="chat-avatar">
+                    <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                </div>
+                <div class="chat-details">
+                    <div class="chat-header-line">
+                        <div class="chat-name-group">Telegram</div>
+                        <div class="chat-time-group">12.09.2026 <svg viewBox="0 0 6 10"><path d="M1 1l4 4-4 4"/></svg></div>
+                    </div>
+                    <div class="chat-preview">Telegram code: 1337</div>
+                </div>
+            </div>
+
+            <!-- FACEBOOK -->
+            <div class="chat-item">
+                <div class="unread-dot"></div>
+                <div class="chat-avatar">
+                    <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                </div>
+                <div class="chat-details">
+                    <div class="chat-header-line">
+                        <div class="chat-name-group">FACEBOOK</div>
+                        <div class="chat-time-group">03.09.2026 <svg viewBox="0 0 6 10"><path d="M1 1l4 4-4 4"/></svg></div>
+                    </div>
+                    <div class="chat-preview">22867— ваш код Instagram. Никому его не передавайте.</div>
+                </div>
+            </div>
+
+            <!-- Мамочка -->
+            <div class="chat-item">
+                <div class="unread-dot active"></div>
+                <div class="chat-avatar">
+                    <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=120&q=80" alt="Avatar">
+                </div>
+                <div class="chat-details">
+                    <div class="chat-header-line">
+                        <div class="chat-name-group">Мама</div>
+                        <div class="chat-time-group">31.08.2026 <svg viewBox="0 0 6 10"><path d="M1 1l4 4-4 4"/></svg></div>
+                    </div>
+                    <div class="chat-preview">Etot abonent zvonil vam 1 raz 31/08 v 10:23. Orange</div>
+                </div>
+            </div>
+
+            <!-- micb.md -->
+            <div class="chat-item">
+                <div class="unread-dot"></div>
+                <div class="chat-avatar">
+                    <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                </div>
+                <div class="chat-details">
+                    <div class="chat-header-line">
+                        <div class="chat-name-group">micb.md</div>
+                        <div class="chat-time-group">30.08.2026 <svg viewBox="0 0 6 10"><path d="M1 1l4 4-4 4"/></svg></div>
+                    </div>
+                    <div class="chat-preview">ATENTIE! Nu comunicati nimanui parola! Parola OTP: 563758 : Pentru securizarea contului in M...</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="search-float-bar">
+            <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+            <input type="text" placeholder="Поиск">
+        </div>
+    </div>
+
+
+    <!-- 2. ЭКРАН ЧАТА "7000" -->
+    <div class="screen hidden-right" id="chatScreen">
+        <header class="chat-header">
+            <div class="header-top">
+                <div class="back-btn" id="backToChats">
+                    <svg viewBox="0 0 12 20"><path d="M10 2L2 10L10 18"/></svg>
+                    <span class="badge">248</span>
+                </div>
+                <div class="contact-trigger" id="contactTrigger">
+                    <div class="contact-avatar-small">
+                        <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                    </div>
+                    <div class="contact-name-small">
+                        7000
+                        <svg viewBox="0 0 6 10"><path d="M1 1l4 4-4 4"/></svg>
+                    </div>
+                </div>
+                <div style="width: 45px;"></div>
+            </div>
+        </header>
+
+        <main class="chat-body" id="chatBody">
+            <div class="meta-info">
+                <div class="meta-text">Текстовое сообщение • SMS</div>
+                <div class="meta-text">22 июня 2025 г., 18:39</div>
+            </div>
+
+            <!-- Первое сообщение -->
+            <div class="message-row sent">
+                <div class="bubble sent">2402</div>
+            </div>
+            <div class="message-row received">
+                <div class="bubble received">Vash zapros obrabatyvaetsea.</div>
+            </div>
+            <div class="message-row received">
+                <div class="bubble received">Electronnyi bilet no.<br><span class="blue-link">24027493</span><br>22.06.2025<br>Deistvitelen 1 chas (<span class="underline-text">s 18:39 do 19:39</span>)<br>Tsena 7 MDL<br>Bortovoi nomer 2402</div>
+            </div>
+
+            <!-- Второе сообщение -->
+            <div class="message-row sent" style="margin-top: 8px;">
+                <div class="bubble sent">2402</div>
+            </div>
+            <div class="message-row received">
+                <div class="bubble received">Vash zapros obrabatyvaetsea.</div>
+            </div>
+            <div class="message-row received">
+                <div class="bubble received">Electronnyi bilet no.<br><span class="blue-link">24027494</span><br>22.06.2025<br>Deistvitelen 1 chas (<span class="underline-text">s 18:39 do 19:39</span>)<br>Tsena 7 MDL<br>Bortovoi nomer 2402</div>
+            </div>
+        </main>
+
+        <footer class="input-bar">
+            <div class="plus-btn">
+                <svg viewBox="0 0 16 16"><path d="M8 2v12M2 8h12"/></svg>
+            </div>
+            <div class="input-container">
+                <input type="text" id="msgInput" placeholder="Текстовое сообщение • SMS" autocomplete="off">
+                <div class="mic-btn" id="micBtn">
+                    <svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.48 6-3.3 6-6.72h-1.7z"/></svg>
+                </div>
+                <div class="send-btn" id="sendBtn">
+                    <svg viewBox="0 0 12 14"><path d="M6 13V2M1 6l5-5 5 5"/></svg>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+
+    <!-- 3. ЭКРАН ПРОФИЛЯ КОНТАКТА (kontakti.jpg) -->
+    <div class="screen hidden-right" id="profileScreen">
+        <div class="profile-header">
+            <div class="profile-back-btn" id="backToChatFromProfile">
+                <svg viewBox="0 0 10 16"><path d="M8 2L2 8l6 6"/></svg>
+            </div>
+        </div>
+
+        <div class="profile-body">
+            <div class="profile-main-avatar">
+                <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+            </div>
+
+            <div class="profile-title">7000</div>
+
+            <!-- Иконки действий -->
+            <div class="action-buttons-row">
+                <div class="action-circle-btn">
+                    <svg viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
+                </div>
+                <div class="action-circle-btn">
+                    <svg viewBox="0 0 24 24"><path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/></svg>
+                </div>
+                <div class="action-circle-btn">
+                    <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+                </div>
+            </div>
+
+            <!-- Карточка 1: Телефон -->
+            <div class="card-group">
+                <div class="card-row">
+                    <div class="card-row-left">
+                        <div class="phone-label">телефон <span class="recent-tag">НЕДАВНИЙ</span></div>
+                        <div class="phone-number">7000</div>
+                    </div>
+                    <div style="color: #8e8e93;">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="#8e8e93"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Карточка 2: Действия контакта -->
+            <div class="card-group">
+                <div class="card-row">
+                    <div class="row-blue-text">Создать контакт</div>
+                </div>
+                <div class="card-row">
+                    <div class="row-blue-text">Добавить в имеющийся</div>
+                </div>
+            </div>
+
+            <!-- Карточка 3: Уведомления -->
+            <div class="card-group">
+                <div class="card-row">
+                    <div>Скрытие уведомлений</div>
+                    <div class="toggle-switch" id="toggleNotify">
+                        <div class="toggle-handle"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Карточка 4: Блокировка -->
+            <div class="card-group">
+                <div class="card-row">
+                    <div class="row-red-text">Заблокировать контакт</div>
+                </div>
+            </div>
+
+            <div class="encryption-note">Этот разговор не зашифрован. <span>Подробнее...</span></div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    // Навигация по экранам
+    const chatsListScreen = document.getElementById('chatsListScreen');
+    const chatScreen = document.getElementById('chatScreen');
+    const profileScreen = document.getElementById('profileScreen');
+
+    const openChat7000 = document.getElementById('openChat7000');
+    const backToChats = document.getElementById('backToChats');
+    const contactTrigger = document.getElementById('contactTrigger');
+    const backToChatFromProfile = document.getElementById('backToChatFromProfile');
+
+    // Элементы ввода
+    const msgInput = document.getElementById('msgInput');
+    const sendBtn = document.getElementById('sendBtn');
+    const micBtn = document.getElementById('micBtn');
+    const chatBody = document.getElementById('chatBody');
+
+    let ticketCounter = 24027495;
+
+    // Переходы экранов
+    openChat7000.addEventListener('click', () => {
+        chatsListScreen.className = 'screen hidden-left';
+        chatScreen.className = 'screen active';
+    });
+
+    backToChats.addEventListener('click', () => {
+        chatScreen.className = 'screen hidden-right';
+        chatsListScreen.className = 'screen active';
+    });
+
+    contactTrigger.addEventListener('click', () => {
+        chatScreen.className = 'screen hidden-left';
+        profileScreen.className = 'screen active';
+    });
+
+    backToChatFromProfile.addEventListener('click', () => {
+        profileScreen.className = 'screen hidden-right';
+        chatScreen.className = 'screen active';
+    });
+
+    // Переключатель скрытия уведомлений
+    const toggleNotify = document.getElementById('toggleNotify');
+    toggleNotify.addEventListener('click', () => {
+        toggleNotify.classList.toggle('active');
+    });
+
+    // Управление кнопкой отправки
+    msgInput.addEventListener('input', () => {
+        if (msgInput.value.trim().length > 0) {
+            sendBtn.style.display = 'flex';
+            micBtn.style.display = 'none';
+        } else {
+            sendBtn.style.display = 'none';
+            micBtn.style.display = 'flex';
+        }
+    });
+
+    function scrollToBottom() {
+        chatBody.scrollTop = chatBody.scrollHeight;
+    }
+
+    function formatDate(date) {
+        const d = String(date.getDate()).padStart(2, '0');
+        const m = String(date.getMonth() + 1).padStart(2, '0');
+        const y = date.getFullYear();
+        return `${d}.${m}.${y}`;
+    }
+
+    function formatTime(date) {
+        const h = String(date.getHours()).padStart(2, '0');
+        const m = String(date.getMinutes()).padStart(2, '0');
+        return `${h}:${m}`;
+    }
+
+    function sendMessage() {
+        const code = msgInput.value.trim();
         if (!code) return;
 
-        // User Outgoing Message
-        appendOutgoingMessage(code);
-        messageInput.value = '';
-        sendBtn.disabled = true;
-        sendBtn.classList.add('opacity-50', 'cursor-not-allowed');
+        // 1. Сообщение пользователя
+        const userRow = document.createElement('div');
+        userRow.className = 'message-row sent';
+        userRow.innerHTML = `<div class="bubble sent">${code}</div>`;
+        chatBody.appendChild(userRow);
+
+        msgInput.value = '';
+        sendBtn.style.display = 'none';
+        micBtn.style.display = 'flex';
         scrollToBottom();
 
-        // Show Typing Indicator
-        const typingElem = showTypingIndicator();
-        scrollToBottom();
-
-        // Step A: Replace typing indicator with "Vash zapros obrabatyvaetsea."
+        // 2. Ответ "Vash zapros obrabatyvaetsea."
         setTimeout(() => {
-          removeElement(typingElem);
-          appendIncomingMessage('Vash zapros obrabatyvaetsea.');
-          scrollToBottom();
-
-          // Step B: Show typing indicator for ticket message
-          const typingElem2 = showTypingIndicator();
-          scrollToBottom();
-
-          // Step C: Render Ticket Message
-          setTimeout(() => {
-            removeElement(typingElem2);
-            const ticketHTML = generateTicketHTML(code);
-            appendIncomingMessage(ticketHTML, true);
+            const procRow = document.createElement('div');
+            procRow.className = 'message-row received';
+            procRow.innerHTML = `<div class="bubble received">Vash zapros obrabatyvaetsea.</div>`;
+            chatBody.appendChild(procRow);
             scrollToBottom();
-          }, 1200);
 
-        }, 1000);
-      }
+            // 3. Билет на 7 MDL
+            setTimeout(() => {
+                const now = new Date();
+                const afterHour = new Date(now.getTime() + 60 * 60 * 1000);
 
-      sendBtn.addEventListener('click', handleSend);
-      messageInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
-          e.preventDefault();
-          handleSend();
-        }
-      });
+                const dateStr = formatDate(now);
+                const startTimeStr = formatTime(now);
+                const endTimeStr = formatTime(afterHour);
+                const currentTicketNo = ticketCounter++;
 
-      function appendOutgoingMessage(text) {
-        const wrap = document.createElement('div');
-        wrap.className = 'flex justify-end mb-1 shrink-0';
-        wrap.innerHTML = `
-          <div class="bubble-outgoing px-3.5 py-1.5 max-w-[75%] text-[15px] leading-snug">
-            ${escapeHTML(text)}
-          </div>
-        `;
-        chatContainer.appendChild(wrap);
-      }
+                const ticketRow = document.createElement('div');
+                ticketRow.className = 'message-row received';
+                ticketRow.innerHTML = `
+                    <div class="bubble received">Electronnyi bilet no.<br><span class="blue-link">${currentTicketNo}</span><br>${dateStr}<br>Deistvitelen 1 chas (<span class="underline-text">s ${startTimeStr} do ${endTimeStr}</span>)<br>Tsena 7 MDL<br>Bortovoi nomer ${code}</div>
+                `;
+                chatBody.appendChild(ticketRow);
+                scrollToBottom();
+            }, 800);
 
-      function appendIncomingMessage(content, isHTML = false) {
-        const wrap = document.createElement('div');
-        wrap.className = 'flex justify-start mb-1 shrink-0';
-        wrap.innerHTML = `
-          <div class="bubble-incoming px-3.5 ${isHTML ? 'py-2 max-w-[85%] leading-relaxed' : 'py-1.5 max-w-[80%] leading-snug'} text-[15px]">
-            ${isHTML ? content : escapeHTML(content)}
-          </div>
-        `;
-        chatContainer.appendChild(wrap);
-      }
+        }, 400);
+    }
 
-      function showTypingIndicator() {
-        const wrap = document.createElement('div');
-        wrap.className = 'flex justify-start mb-1 shrink-0 typing-container';
-        wrap.innerHTML = `
-          <div class="bubble-incoming px-4 py-2.5 flex items-center space-x-1">
-            <span class="typing-dot"></span>
-            <span class="typing-dot"></span>
-            <span class="typing-dot"></span>
-          </div>
-        `;
-        chatContainer.appendChild(wrap);
-        return wrap;
-      }
-
-      function removeElement(elem) {
-        if (elem && elem.parentNode) {
-          elem.parentNode.removeChild(elem);
-        }
-      }
-
-      // Generate Ticket HTML (7 MDL Price)
-      function generateTicketHTML(bortovoiCode) {
-        const now = new Date();
-        
-        // Random ticket number continuation
-        const ticketNo = bortovoiCode + String(Math.floor(1000 + Math.random() * 9000));
-        
-        // Formatted Date DD.MM.YYYY
-        const day = String(now.getDate()).padStart(2, '0');
-        const month = String(now.getMonth() + 1).padStart(2, '0');
-        const year = now.getFullYear();
-        const formattedDate = `${day}.${month}.${year}`;
-
-        // 1 Hour validity window calculation
-        const startHours = String(now.getHours()).padStart(2, '0');
-        const startMinutes = String(now.getMinutes()).padStart(2, '0');
-
-        const expiryDate = new Date(now.getTime() + 60 * 60 * 1000);
-        const endHours = String(expiryDate.getHours()).padStart(2, '0');
-        const endMinutes = String(expiryDate.getMinutes()).padStart(2, '0');
-
-        return `
-          Electronnyi bilet no.<br>
-          <span class="ticket-link">${ticketNo}</span><br>
-          ${formattedDate}<br>
-          Deistvitelen 1 chas (<span class="time-underline">s ${startHours}:${startMinutes} do ${endHours}:${endMinutes}</span>)<br>
-          Tsena 7 MDL<br>
-          Bortovoi nomer ${escapeHTML(bortovoiCode)}
-        `;
-      }
-
-      function scrollToBottom() {
-        chatContainer.scrollTop = chatContainer.scrollHeight;
-      }
-
-      function escapeHTML(str) {
-        return str.replace(/[&<>'"]/g, 
-          tag => ({
-            '&': '&amp;',
-            '<': '&lt;',
-            '>': '&gt;',
-            "'": '&#39;',
-            '"': '&quot;'
-          }[tag] || tag)
-        );
-      }
-
-      scrollToBottom();
+    sendBtn.addEventListener('click', sendMessage);
+    msgInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') sendMessage();
     });
-  </script>
+</script>
+
 </body>
 </html>
