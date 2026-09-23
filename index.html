@@ -99,16 +99,18 @@
 
         /* Единый стиль аватарок «7000» с увеличенной иконкой человека */
         .avatar, .chat-header-avatar, .profile-avatar {
+            position: relative;
             border-radius: 50%;
-            background: linear-gradient(135deg, #1c1c1e 0%, #2c2c2e 100%);
-            border: 0.5px solid rgba(255, 255, 255, 0.18);
+            /* richer gradient similar to reference image */
+            background: linear-gradient(135deg, #2f2f31 0%, #3b3b3d 45%, #262628 100%);
+            border: 0.5px solid rgba(255, 255, 255, 0.12);
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: 700;
             color: #ffffff;
             letter-spacing: -0.3px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
             flex-shrink: 0;
             overflow: hidden;
         }
@@ -127,7 +129,21 @@
             width: 90px;
             height: 90px;
             margin-bottom: 4px;
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 8px 28px rgba(0, 0, 0, 0.55);
+        }
+
+        /* subtle glint/oval inside avatar near the bottom to match reference */
+        .avatar::after, .chat-header-avatar::after, .profile-avatar::after {
+            content: "";
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            bottom: 12%;
+            width: 70%;
+            height: 26%;
+            background: rgba(255,255,255,0.06);
+            border-radius: 50%;
+            pointer-events: none;
         }
 
         /* Увеличенный размер самой иконки человека внутри аватара */
@@ -254,7 +270,7 @@
 
         /* Крупный заголовок под шапкой (внутри скролл-контейнера) */
         .large-title-container {
-            padding: 4px 16px 12px 16px;
+            padding: 4px 16px 6px 16px; /* reduced bottom padding to remove extra space under big letters */
             display: flex;
             flex-direction: column;
             gap: 2px;
@@ -379,34 +395,102 @@
             bottom: calc(env(safe-area-inset-bottom) + 16px);
             left: 50%;
             transform: translateX(-50%);
+            background: transparent;
+            border-radius: 28px;
+            padding: 0; /* inner element handles padding */
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            z-index: 10;
+            width: calc(100% - 56px);
+            max-width: 760px;
+            justify-content: center;
+        }
+
+        .search-bg {
+            display: flex;
+            align-items: center;
+            gap: 12px;
             background: var(--glass-bg);
             backdrop-filter: blur(25px) saturate(180%);
             -webkit-backdrop-filter: blur(25px) saturate(180%);
             border-radius: 25px;
-            padding: 8px 16px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
+            padding: 0 12px; /* vertical sizing handled by explicit height */
             border: 0.5px solid var(--glass-border);
             box-shadow: var(--glass-shadow);
-            z-index: 10;
-            width: calc(100% - 32px);
+            flex: 1 1 auto;
+            min-width: 0;
+            height: 44px; /* make panel height explicit so compose icon can match it */
         }
 
-        .search-float-bar svg {
-            width: 16px;
-            height: 16px;
-            fill: var(--secondary-text);
+        /* main magnifier on the left inside the glass - larger and white */
+        .search-bg > svg {
+            width: 22px;
+            height: 22px;
+            fill: #ffffff;
+            flex: 0 0 auto;
         }
 
-        .search-float-bar input {
+        .search-bg input {
             background: transparent;
             border: none;
             outline: none;
             color: #ffffff;
             font-size: 15px;
-            flex: 1;
+            flex: 1 1 auto;
+            min-width: 120px;
+            margin: 0 6px;
         }
+
+        .search-actions { display: none; }
+
+        .search-action { display: none; }
+
+        /* Microphone: no background, white icon (inside the glass) */
+        .mic-action {
+            background: transparent;
+            border: none;
+            padding: 6px;
+            cursor: pointer;
+            flex: 0 0 auto;
+        }
+
+        .mic-action svg {
+            width: 20px;
+            height: 20px;
+            fill: #ffffff;
+        }
+
+        /* Compose/edit remains outside the glass */
+        .compose-action {
+            width: 42px;
+            height: 36px;
+            border-radius: 8px;
+            background: transparent;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex: 0 0 auto;
+            margin-left: 8px;
+        }
+
+        .compose-action .compose-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: var(--glass-bg);
+            backdrop-filter: blur(25px) saturate(180%);
+            -webkit-backdrop-filter: blur(25px) saturate(180%);
+            border: 0.5px solid var(--glass-border);
+            box-shadow: var(--glass-shadow);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .compose-action .compose-icon svg { width: 18px; height: 18px; fill: #ffffff; }
+
+        .search-action:active, .compose-action:active, .mic-action:active { transform: scale(0.98); opacity: 0.95; }
 
         /* --- 2. ЭКРАН ЧАТА --- */
         .chat-header {
@@ -416,12 +500,13 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            background: rgba(20, 20, 25, 0.65);
-            backdrop-filter: blur(25px) saturate(180%);
-            -webkit-backdrop-filter: blur(25px) saturate(180%);
-            border-bottom: 0.5px solid rgba(255, 255, 255, 0.1);
+            /* make header background transparent so chat doesn't have solid glass behind avatar/name */
+            background: transparent;
+            backdrop-filter: none;
+            -webkit-backdrop-filter: none;
+            border-bottom: none;
             padding-top: calc(env(safe-area-inset-top) + 8px);
-            padding-bottom: 10px;
+            padding-bottom: 6px; /* reduced padding to remove extra space */
         }
 
         .header-top {
@@ -474,6 +559,7 @@
             display: flex;
             align-items: center;
             gap: 3px;
+            padding-left: 6px; /* nudge small text slightly right */
         }
 
         .contact-name-small svg {
@@ -903,8 +989,21 @@
         </div>
 
         <div class="search-float-bar">
-            <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
-            <input type="text" placeholder="Поиск">
+            <div class="search-bg">
+                <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+                <input type="text" placeholder="Поиск">
+                <button class="mic-action" title="Голосовой ввод" aria-label="Голосовой ввод">
+                    <svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.48 6-3.3 6-6.72h-1.7z"/></svg>
+                </button>
+            </div>
+            <div class="compose-action" title="Новое сообщение">
+                <div class="compose-icon">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25z"/>
+                        <path d="M20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+                    </svg>
+                </div>
+            </div>
         </div>
     </div>
 
