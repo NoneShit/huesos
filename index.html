@@ -10,17 +10,25 @@
     * {
       -webkit-tap-highlight-color: transparent;
       user-select: none;
+      box-sizing: border-box;
     }
 
-    body, html {
+    /* Fixed full screen app layout using dynamic viewport units */
+    html, body {
       margin: 0;
       padding: 0;
       width: 100%;
       height: 100%;
+      height: 100dvh;
       background-color: #000000;
       color: #ffffff;
       font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", Arial, sans-serif;
       overflow: hidden;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
     }
 
     /* iOS Message Bubbles */
@@ -81,22 +89,50 @@
       background-color: #1c1c1e;
       border: 1px solid #2c2c2e;
     }
+
+    /* Animated Typing Indicator Dots */
+    .typing-dot {
+      width: 7px;
+      height: 7px;
+      background-color: #8e8e93;
+      border-radius: 50%;
+      display: inline-block;
+      animation: typingBounce 1.4s infinite ease-in-out both;
+    }
+
+    .typing-dot:nth-child(1) { animation-delay: 0s; }
+    .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+    .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+    @keyframes typingBounce {
+      0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+      40% { transform: scale(1.1); opacity: 1; }
+    }
+
+    /* Modal slide up animation */
+    .modal-slide-enter {
+      transform: translateY(100%);
+      transition: transform 0.28s cubic-bezier(0.32, 0.72, 0, 1);
+    }
+    .modal-slide-active {
+      transform: translateY(0%);
+    }
   </style>
 </head>
 <body class="bg-black text-white antialiased">
-  <div class="w-full h-full flex flex-col justify-between bg-black relative">
+  <div class="w-full h-full flex flex-col justify-between bg-black relative overflow-hidden">
     
-    <!-- Header (Pure iOS Messages Header) -->
-    <header class="pt-3 px-4 pb-2 bg-black/95 backdrop-blur-md sticky top-0 z-50 border-b border-zinc-900/60">
+    <!-- Fixed Top Header (Does not scroll or collapse when keyboard opens) -->
+    <header class="pt-3 px-4 pb-2.5 bg-black/95 backdrop-blur-md shrink-0 z-40 border-b border-zinc-900/80 select-none">
       <div class="relative flex items-center justify-between">
-        <!-- Back Button -->
-        <button class="flex items-center text-[#0a84ff] text-base focus:outline-none">
+        <!-- Back Button with Unread Badge -->
+        <button class="flex items-center text-[#0a84ff] text-base focus:outline-none active:opacity-60">
           <i class="fa-solid fa-chevron-left text-lg pr-1.5 font-bold"></i>
           <span class="bg-[#2c2c2e] text-white text-[13px] font-medium px-2 py-0.5 rounded-full min-w-[28px] text-center">248</span>
         </button>
 
-        <!-- Avatar & Contact Name -->
-        <div class="flex flex-col items-center">
+        <!-- Clickable Contact Info Header -->
+        <div id="contact-header-btn" class="flex flex-col items-center cursor-pointer active:opacity-70 transition">
           <div class="w-10 h-10 rounded-full bg-gradient-to-b from-[#8e8e93] to-[#48484a] flex items-center justify-center shadow-inner">
             <i class="fa-solid fa-user text-xl text-white/90"></i>
           </div>
@@ -106,20 +142,20 @@
           </div>
         </div>
 
-        <!-- Spacer for centering avatar -->
+        <!-- Right Spacer -->
         <div class="w-12"></div>
       </div>
     </header>
 
-    <!-- Chat Messages Scroll Container -->
+    <!-- Scrollable Chat Area -->
     <main id="chat-container" class="flex-1 overflow-y-auto px-3 py-3 space-y-2.5 flex flex-col">
       <!-- Timestamp Header -->
-      <div class="text-center my-1.5">
+      <div class="text-center my-1.5 shrink-0">
         <p class="text-[11px] text-zinc-500 font-medium">Текстовое сообщение • SMS</p>
         <p id="chat-date-header" class="text-[11px] text-zinc-500 font-medium">22 июня 2025 г., 18:39</p>
       </div>
 
-      <!-- Initial Ticket Message Example (Matches image layout) -->
+      <!-- Sample Historical Messages -->
       <div class="flex justify-end mb-0.5">
         <div class="bubble-outgoing px-3.5 py-1.5 max-w-[75%] text-[15px] leading-snug">
           2402
@@ -144,13 +180,13 @@
       </div>
     </main>
 
-    <!-- Input Bar -->
-    <footer class="p-2 pb-5 bg-black border-t border-zinc-900/80 flex items-center space-x-2">
-      <button class="w-8 h-8 rounded-full bg-[#1c1c1e] text-zinc-400 flex items-center justify-center hover:text-white transition">
+    <!-- Fixed Bottom Message Input Bar -->
+    <footer class="p-2 pb-5 bg-black border-t border-zinc-900/80 shrink-0 z-40 flex items-center space-x-2">
+      <button class="w-8 h-8 rounded-full bg-[#1c1c1e] text-zinc-400 flex items-center justify-center active:bg-zinc-800 transition">
         <i class="fa-solid fa-plus text-base"></i>
       </button>
 
-      <!-- Text Input Field -->
+      <!-- Input Field Container -->
       <div class="flex-1 ios-input-bg rounded-full flex items-center px-3.5 py-1.5">
         <input 
           type="text" 
@@ -166,10 +202,66 @@
       </div>
 
       <!-- Send Button -->
-      <button id="send-btn" class="w-8 h-8 rounded-full bg-[#34c759] text-white flex items-center justify-center opacity-50 cursor-not-allowed transition" disabled>
+      <button id="send-btn" class="w-8 h-8 rounded-full bg-[#34c759] text-white flex items-center justify-center opacity-50 cursor-not-allowed transition active:scale-95" disabled>
         <i class="fa-solid fa-arrow-up text-sm font-bold"></i>
       </button>
     </footer>
+  </div>
+
+  <!-- iOS Contact Info View Overlay Modal -->
+  <div id="contact-modal" class="fixed inset-0 bg-black z-50 modal-slide-enter flex flex-col hidden">
+    <!-- Contact Navigation Header -->
+    <div class="px-4 py-3 flex items-center justify-between border-b border-zinc-800 bg-[#1c1c1e]/90 backdrop-blur-md">
+      <span class="w-16"></span>
+      <span class="text-[17px] font-semibold text-white">Контакты</span>
+      <button id="close-modal-btn" class="text-[#0a84ff] font-semibold text-[17px] w-16 text-right focus:outline-none active:opacity-60">
+        Готово
+      </button>
+    </div>
+
+    <!-- Contact Details Content -->
+    <div class="flex-1 overflow-y-auto px-4 py-6 flex flex-col items-center">
+      <!-- Contact Large Avatar -->
+      <div class="w-24 h-24 rounded-full bg-gradient-to-b from-[#8e8e93] to-[#48484a] flex items-center justify-center shadow-lg mb-3">
+        <i class="fa-solid fa-user text-5xl text-white/90"></i>
+      </div>
+
+      <!-- Contact Name -->
+      <h2 class="text-2xl font-bold text-white mb-6">7000</h2>
+
+      <!-- Quick Action Buttons Row -->
+      <div class="grid grid-cols-4 gap-3 w-full max-w-sm mb-6">
+        <div class="flex flex-col items-center bg-[#1c1c1e] p-2.5 rounded-xl border border-zinc-800/80 active:bg-zinc-800 transition">
+          <i class="fa-solid fa-comment text-[#0a84ff] text-xl mb-1"></i>
+          <span class="text-[11px] text-[#0a84ff]">сообщение</span>
+        </div>
+        <div class="flex flex-col items-center bg-[#1c1c1e] p-2.5 rounded-xl border border-zinc-800/80 active:bg-zinc-800 transition">
+          <i class="fa-solid fa-phone text-[#0a84ff] text-xl mb-1"></i>
+          <span class="text-[11px] text-[#0a84ff]">сотовый</span>
+        </div>
+        <div class="flex flex-col items-center bg-[#1c1c1e] p-2.5 rounded-xl border border-zinc-800/80 opacity-50">
+          <i class="fa-solid fa-video text-zinc-500 text-xl mb-1"></i>
+          <span class="text-[11px] text-zinc-500">видео</span>
+        </div>
+        <div class="flex flex-col items-center bg-[#1c1c1e] p-2.5 rounded-xl border border-zinc-800/80 opacity-50">
+          <i class="fa-solid fa-envelope text-zinc-500 text-xl mb-1"></i>
+          <span class="text-[11px] text-zinc-500">почта</span>
+        </div>
+      </div>
+
+      <!-- Phone Number Card -->
+      <div class="w-full max-w-sm bg-[#1c1c1e] rounded-xl p-3.5 border border-zinc-800/80 mb-4">
+        <p class="text-[12px] text-zinc-400 mb-0.5">сотовый</p>
+        <p class="text-[17px] text-[#0a84ff] font-normal">7000</p>
+      </div>
+
+      <!-- Additional Options -->
+      <div class="w-full max-w-sm bg-[#1c1c1e] rounded-xl border border-zinc-800/80 divide-y divide-zinc-800">
+        <div class="p-3.5 text-[#0a84ff] text-[15px]">Поделиться контактом</div>
+        <div class="p-3.5 text-[#0a84ff] text-[15px]">Добавить в избранное</div>
+        <div class="p-3.5 text-[#ff453a] text-[15px]">Заблокировать абонента</div>
+      </div>
+    </div>
   </div>
 
   <script>
@@ -178,8 +270,11 @@
       const messageInput = document.getElementById('message-input');
       const sendBtn = document.getElementById('send-btn');
       const chatDateHeader = document.getElementById('chat-date-header');
+      const contactHeaderBtn = document.getElementById('contact-header-btn');
+      const contactModal = document.getElementById('contact-modal');
+      const closeModalBtn = document.getElementById('close-modal-btn');
 
-      // Set formatted Date Header
+      // 1. Initialize Date Header
       function setInitialDateHeader() {
         const now = new Date();
         const months = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'];
@@ -192,7 +287,7 @@
       }
       setInitialDateHeader();
 
-      // Enable / Disable Send Button
+      // 2. Enable / Disable Send Button
       messageInput.addEventListener('input', () => {
         const val = messageInput.value.trim();
         if (val.length > 0) {
@@ -206,32 +301,56 @@
         }
       });
 
-      // Handle Message Submit
+      // 3. Contact Profile Modal Toggle
+      contactHeaderBtn.addEventListener('click', () => {
+        contactModal.classList.remove('hidden');
+        setTimeout(() => {
+          contactModal.classList.add('modal-slide-active');
+        }, 10);
+      });
+
+      closeModalBtn.addEventListener('click', () => {
+        contactModal.classList.remove('modal-slide-active');
+        setTimeout(() => {
+          contactModal.classList.add('hidden');
+        }, 280);
+      });
+
+      // 4. Handle Message Send with Typing Animation Effect
       function handleSend() {
         const code = messageInput.value.trim();
         if (!code) return;
 
-        // 1. Add User's Message
+        // User Outgoing Message
         appendOutgoingMessage(code);
         messageInput.value = '';
         sendBtn.disabled = true;
         sendBtn.classList.add('opacity-50', 'cursor-not-allowed');
-
         scrollToBottom();
 
-        // 2. Immediate Reply "Vash zapros obrabatyvaetsea."
+        // Show Typing Indicator
+        const typingElem = showTypingIndicator();
+        scrollToBottom();
+
+        // Step A: Replace typing indicator with "Vash zapros obrabatyvaetsea."
         setTimeout(() => {
+          removeElement(typingElem);
           appendIncomingMessage('Vash zapros obrabatyvaetsea.');
           scrollToBottom();
 
-          // 3. Second Reply: Ticket Details (after ~1 sec delay)
+          // Step B: Show typing indicator for ticket message
+          const typingElem2 = showTypingIndicator();
+          scrollToBottom();
+
+          // Step C: Render Ticket Message
           setTimeout(() => {
+            removeElement(typingElem2);
             const ticketHTML = generateTicketHTML(code);
             appendIncomingMessage(ticketHTML, true);
             scrollToBottom();
-          }, 800);
+          }, 1200);
 
-        }, 300);
+        }, 1000);
       }
 
       sendBtn.addEventListener('click', handleSend);
@@ -244,7 +363,7 @@
 
       function appendOutgoingMessage(text) {
         const wrap = document.createElement('div');
-        wrap.className = 'flex justify-end mb-1';
+        wrap.className = 'flex justify-end mb-1 shrink-0';
         wrap.innerHTML = `
           <div class="bubble-outgoing px-3.5 py-1.5 max-w-[75%] text-[15px] leading-snug">
             ${escapeHTML(text)}
@@ -255,7 +374,7 @@
 
       function appendIncomingMessage(content, isHTML = false) {
         const wrap = document.createElement('div');
-        wrap.className = 'flex justify-start mb-1';
+        wrap.className = 'flex justify-start mb-1 shrink-0';
         wrap.innerHTML = `
           <div class="bubble-incoming px-3.5 ${isHTML ? 'py-2 max-w-[85%] leading-relaxed' : 'py-1.5 max-w-[80%] leading-snug'} text-[15px]">
             ${isHTML ? content : escapeHTML(content)}
@@ -264,20 +383,40 @@
         chatContainer.appendChild(wrap);
       }
 
-      // Ticket Generator with 7 MDL price and calculated times
+      function showTypingIndicator() {
+        const wrap = document.createElement('div');
+        wrap.className = 'flex justify-start mb-1 shrink-0 typing-container';
+        wrap.innerHTML = `
+          <div class="bubble-incoming px-4 py-2.5 flex items-center space-x-1">
+            <span class="typing-dot"></span>
+            <span class="typing-dot"></span>
+            <span class="typing-dot"></span>
+          </div>
+        `;
+        chatContainer.appendChild(wrap);
+        return wrap;
+      }
+
+      function removeElement(elem) {
+        if (elem && elem.parentNode) {
+          elem.parentNode.removeChild(elem);
+        }
+      }
+
+      // Generate Ticket HTML (7 MDL Price)
       function generateTicketHTML(bortovoiCode) {
         const now = new Date();
         
-        // Random 8-digit ticket number (starting with code if numeric)
+        // Random ticket number continuation
         const ticketNo = bortovoiCode + String(Math.floor(1000 + Math.random() * 9000));
         
-        // Date DD.MM.YYYY
+        // Formatted Date DD.MM.YYYY
         const day = String(now.getDate()).padStart(2, '0');
         const month = String(now.getMonth() + 1).padStart(2, '0');
         const year = now.getFullYear();
         const formattedDate = `${day}.${month}.${year}`;
 
-        // Time calculations (1 hour period)
+        // 1 Hour validity window calculation
         const startHours = String(now.getHours()).padStart(2, '0');
         const startMinutes = String(now.getMinutes()).padStart(2, '0');
 
