@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Сообщения</title>
-    <!-- Иконка iMessage -->
     <link rel="icon" type="image/svg+xml" href="https://upload.wikimedia.org/wikipedia/commons/5/51/IMessage_logo.svg">
     <link rel="apple-touch-icon" href="https://upload.wikimedia.org/wikipedia/commons/5/51/IMessage_logo.svg">
     <style>
@@ -15,7 +14,9 @@
             --text-color: #ffffff;
             --secondary-text: #8e8e93;
             --link-blue: #2997ff;
-            --card-bg: #1c1c1e;
+            --glass-bg: rgba(30, 30, 35, 0.65);
+            --glass-border: rgba(255, 255, 255, 0.15);
+            --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.45);
             --red-color: #ff3b30;
         }
 
@@ -28,7 +29,6 @@
             user-select: none;
         }
 
-        /* Скрытие скроллбаров везде */
         ::-webkit-scrollbar {
             display: none !important;
             width: 0 !important;
@@ -61,7 +61,7 @@
             overflow: hidden;
         }
 
-        /* Экраны */
+        /* Экраны и плавная iOS-анимация */
         .screen {
             position: absolute;
             inset: 0;
@@ -72,11 +72,16 @@
             z-index: 1;
             width: 100%;
             height: 100%;
+            will-change: transform, opacity;
+        }
+
+        .screen.no-transition {
+            transition: none !important;
         }
 
         .screen.hidden-left {
             transform: translateX(-30%);
-            opacity: 0.8;
+            opacity: 0.7;
             pointer-events: none;
         }
 
@@ -92,58 +97,193 @@
             pointer-events: auto;
         }
 
-        /* --- 1. ЭКРАН СПИСКА ЧАТОВ --- */
-        .chats-header {
-            padding: calc(env(safe-area-inset-top) + 12px) 16px 8px 16px;
+        /* Единый стиль аватарок «7000» с увеличенной иконкой человека */
+        .avatar, .chat-header-avatar, .profile-avatar {
+            border-radius: 50%;
+            background: linear-gradient(135deg, #1c1c1e 0%, #2c2c2e 100%);
+            border: 0.5px solid rgba(255, 255, 255, 0.18);
             display: flex;
-            flex-direction: column;
-            gap: 4px;
-            background: rgba(0, 0, 0, 0.85);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            z-index: 5;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: #ffffff;
+            letter-spacing: -0.3px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+            flex-shrink: 0;
+            overflow: hidden;
+        }
+
+        .avatar {
+            width: 48px;
+            height: 48px;
+        }
+
+        .chat-header-avatar {
+            width: 38px;
+            height: 38px;
+        }
+
+        .profile-avatar {
+            width: 90px;
+            height: 90px;
+            margin-bottom: 4px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Увеличенный размер самой иконки человека внутри аватара */
+        .avatar svg, .chat-header-avatar svg, .profile-avatar svg {
+            fill: #ffffff;
+            width: 72%;
+            height: 72%;
+        }
+
+        /* --- 1. ЭКРАН СПИСКА ЧАТОВ --- */
+        /* Изначально шапка полностью прозрачная, без фона и размытия */
+        .chats-header {
+            position: sticky;
+            top: 0;
+            padding-top: calc(env(safe-area-inset-top) + 8px);
+            padding-bottom: 10px;
+            padding-left: 16px;
+            padding-right: 16px;
+            background: rgba(20, 20, 25, 0);
+            backdrop-filter: blur(0px) saturate(100%);
+            -webkit-backdrop-filter: blur(0px) saturate(100%);
+            border-bottom: 0.5px solid rgba(255, 255, 255, 0);
+            z-index: 20;
+            flex-shrink: 0;
+            transition: background 0.1s linear, border-color 0.1s linear;
         }
 
         .chats-top-bar {
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            margin-bottom: 8px;
+            justify-content: space-between;
+            position: relative;
+            min-height: 38px;
         }
 
+        /* Кнопки в шапке (вернуть фон для Edit и стилевую кнопку сортировки) */
         .edit-btn {
-            color: var(--link-blue);
-            font-size: 17px;
+            color: #ffffff;
+            font-size: 18px;
+            font-weight: 700;
+            padding: 8px 18px;
+            min-height: 44px;
+            background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+            backdrop-filter: blur(14px) saturate(160%);
+            -webkit-backdrop-filter: blur(14px) saturate(160%);
+            border: 0.5px solid rgba(255, 255, 255, 0.12);
+            border-radius: 26px;
             cursor: pointer;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            letter-spacing: -0.2px;
+            z-index: 3;
+        }
+
+        .edit-btn:active {
+            opacity: 0.95;
+            transform: scale(0.99);
         }
 
         .filter-btn {
-            width: 32px;
-            height: 32px;
-            background: #1c1c1e;
+            width: 44px;
+            height: 44px;
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(14px) saturate(160%);
+            -webkit-backdrop-filter: blur(14px) saturate(160%);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
+            border: 0.5px solid rgba(255, 255, 255, 0.12);
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+            z-index: 3;
         }
 
         .filter-btn svg {
-            width: 18px;
-            height: 18px;
+            width: 20px;
+            height: 20px;
             fill: #ffffff;
         }
 
-        .chats-title {
+        /* Компактный заголовок по центру шапки (появляется с моушен блюром при скролле) */
+        .compact-title-group {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            /* centered vertically and shifted slightly right compared to previous layout */
+            transform: translate(-50%, -50%);
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start; /* left-align lines */
+            text-align: left;
+            pointer-events: none;
+            opacity: 0;
+            filter: blur(10px);
+            will-change: opacity, filter, transform;
+            width: max-content;
+            max-width: 240px;
+            transition: opacity 180ms linear, filter 180ms linear, transform 180ms linear;
+        }
+
+        .compact-title-group .compact-main {
+            font-size: 18px;
+            font-weight: 700;
+            line-height: 1.05;
+            color: #ffffff;
+            text-shadow: 0 1px 0 rgba(0,0,0,0.4);
+        }
+
+        .compact-title-group .compact-sub {
+            font-size: 12px; /* чуть уменьшили */
+            color: #bdbdbf;
+            font-weight: 500;
+            line-height: 1.05;
+            margin-top: 2px; /* сдвинуть вниз на пару пикселей */
+        }
+
+        .compact-title-group .compact-sub.muted {
+            font-weight: 400;
+            color: #a9a9ad;
+        }
+
+        /* Крупный заголовок под шапкой (внутри скролл-контейнера) */
+        .large-title-container {
+            padding: 4px 16px 12px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            will-change: opacity, filter, transform;
+            transition: opacity 180ms linear, filter 180ms linear, transform 180ms linear;
+        }
+
+        .large-title-container .chats-title {
             font-size: 32px;
             font-weight: 700;
             letter-spacing: -0.5px;
+            color: #ffffff;
+            line-height: 1.1;
         }
 
-        .icloud-status {
+        .large-title-container .icloud-status {
             font-size: 13px;
-            color: var(--secondary-text);
-            margin-bottom: 4px;
+            color: #8e8e93;
+            font-weight: 500;
+            line-height: 1.2;
+        }
+
+        /* Small centered separator under the large title */
+        .section-separator {
+            width: 82%;
+            height: 1px;
+            background: rgba(255, 255, 255, 0.12);
+            margin: 10px auto 8px auto;
+            border-radius: 1px;
         }
 
         .chat-list {
@@ -151,7 +291,7 @@
             overflow-y: auto;
             display: flex;
             flex-direction: column;
-            padding-bottom: 80px;
+            padding-bottom: 90px;
         }
 
         .chat-item {
@@ -161,11 +301,10 @@
             gap: 12px;
             cursor: pointer;
             position: relative;
-            active-background: #1c1c1e;
         }
 
         .chat-item:active {
-            background-color: #121214;
+            background-color: rgba(255, 255, 255, 0.08);
         }
 
         .unread-dot {
@@ -182,38 +321,18 @@
             opacity: 1;
         }
 
-        .chat-avatar {
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            background: linear-gradient(180deg, #686976 0%, #3a3a44 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-            overflow: hidden;
-        }
-
-        .chat-avatar svg {
-            width: 28px;
-            height: 28px;
-            fill: #ffffff;
-        }
-
-        .chat-avatar img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
         .chat-details {
             flex: 1;
             display: flex;
             flex-direction: column;
             gap: 3px;
-            border-bottom: 0.5px solid rgba(255, 255, 255, 0.1);
+            border-bottom: 0.5px solid rgba(255, 255, 255, 0.08);
             padding-bottom: 10px;
             min-width: 0;
+        }
+
+        .chat-item:last-child .chat-details {
+            border-bottom: none;
         }
 
         .chat-header-line {
@@ -260,16 +379,16 @@
             bottom: calc(env(safe-area-inset-bottom) + 16px);
             left: 50%;
             transform: translateX(-50%);
-            background: rgba(28, 28, 30, 0.88);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
+            background: var(--glass-bg);
+            backdrop-filter: blur(25px) saturate(180%);
+            -webkit-backdrop-filter: blur(25px) saturate(180%);
             border-radius: 25px;
             padding: 8px 16px;
             display: flex;
             align-items: center;
             gap: 12px;
-            border: 0.5px solid rgba(255, 255, 255, 0.15);
-            box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+            border: 0.5px solid var(--glass-border);
+            box-shadow: var(--glass-shadow);
             z-index: 10;
             width: calc(100% - 32px);
         }
@@ -297,12 +416,12 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            background: rgba(0, 0, 0, 0.85);
-            backdrop-filter: blur(25px);
-            -webkit-backdrop-filter: blur(25px);
+            background: rgba(20, 20, 25, 0.65);
+            backdrop-filter: blur(25px) saturate(180%);
+            -webkit-backdrop-filter: blur(25px) saturate(180%);
+            border-bottom: 0.5px solid rgba(255, 255, 255, 0.1);
             padding-top: calc(env(safe-area-inset-top) + 8px);
             padding-bottom: 10px;
-            border-bottom: 0.5px solid rgba(255, 255, 255, 0.08);
         }
 
         .header-top {
@@ -332,7 +451,7 @@
         }
 
         .badge {
-            background: #2c2c2e;
+            background: rgba(255, 255, 255, 0.12);
             color: #ffffff;
             font-size: 13px;
             font-weight: 500;
@@ -346,36 +465,20 @@
             flex-direction: column;
             align-items: center;
             cursor: pointer;
-        }
-
-        .contact-avatar-small {
-            width: 46px;
-            height: 46px;
-            border-radius: 50%;
-            background: linear-gradient(180deg, #686976 0%, #3a3a44 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 4px;
-        }
-
-        .contact-avatar-small svg {
-            width: 26px;
-            height: 26px;
-            fill: #ffffff;
+            gap: 4px;
         }
 
         .contact-name-small {
-            font-size: 13px;
-            font-weight: 600;
+            font-size: 12px;
+            font-weight: 500;
             display: flex;
             align-items: center;
             gap: 3px;
         }
 
         .contact-name-small svg {
-            width: 6px;
-            height: 10px;
+            width: 5px;
+            height: 8px;
             fill: none;
             stroke: #8e8e93;
             stroke-width: 2;
@@ -394,6 +497,7 @@
             text-align: center;
             margin-top: 4px;
             margin-bottom: 6px;
+            background: transparent;
         }
 
         .meta-text {
@@ -401,12 +505,12 @@
             font-size: 11px;
         }
 
-        /* Эластичная анимация появления сообщений */
         .message-row {
             display: flex;
             flex-direction: column;
             width: 100%;
-            animation: springPop 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            animation: springPop 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.2);
+            will-change: transform, opacity;
             transform-origin: bottom right;
         }
 
@@ -415,17 +519,8 @@
         }
 
         @keyframes springPop {
-            0% {
-                opacity: 0;
-                transform: scale(0.6) translateY(20px);
-            }
-            70% {
-                transform: scale(1.03) translateY(-2px);
-            }
-            100% {
-                opacity: 1;
-                transform: scale(1) translateY(0);
-            }
+            0% { opacity: 0; transform: scale(0.85) translateY(12px); }
+            100% { opacity: 1; transform: scale(1) translateY(0); }
         }
 
         .message-row.sent { align-items: flex-end; }
@@ -452,6 +547,7 @@
             background-color: var(--bubble-received);
             color: #ffffff;
             border-bottom-left-radius: 4px;
+            border: 0.5px solid rgba(255, 255, 255, 0.05);
         }
 
         .blue-link { color: var(--link-blue); text-decoration: underline; }
@@ -459,25 +555,27 @@
 
         .input-bar {
             padding: 8px 10px calc(env(safe-area-inset-bottom) + 8px) 10px;
-            background: rgba(0, 0, 0, 0.85);
-            backdrop-filter: blur(25px);
-            -webkit-backdrop-filter: blur(25px);
+            background: transparent !important;
+            backdrop-filter: none !important;
+            -webkit-backdrop-filter: none !important;
             display: flex;
             align-items: center;
             gap: 8px;
-            border-top: 0.5px solid rgba(255, 255, 255, 0.05);
+            border-top: none !important;
         }
 
         .plus-btn {
             width: 32px;
             height: 32px;
             border-radius: 50%;
-            background: #2c2c2e;
+            background: rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(15px);
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
             flex-shrink: 0;
+            border: 0.5px solid rgba(255, 255, 255, 0.1);
         }
 
         .plus-btn svg {
@@ -490,9 +588,10 @@
 
         .input-container {
             flex: 1;
-            background: var(--card-bg);
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px);
             border-radius: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.12);
+            border: 0.5px solid var(--glass-border);
             display: flex;
             align-items: center;
             padding: 6px 8px 6px 14px;
@@ -539,7 +638,25 @@
             stroke-width: 2.5;
         }
 
-        /* --- 3. ЭКРАН ПРОФИЛЯ КОНТАКТА --- */
+        /* --- 3. ЭКРАН ПРОФИЛЯ --- */
+        #profileScreen {
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(35px) saturate(190%);
+            -webkit-backdrop-filter: blur(35px) saturate(190%);
+            z-index: 20;
+        }
+
+        /* Overlay modifier for showing a screen over another without sliding the background */
+        .screen.overlay {
+            transform: translateY(0) !important;
+            opacity: 1 !important;
+            pointer-events: auto !important;
+            z-index: 40 !important;
+            transition: opacity 280ms cubic-bezier(0.2,0.9,0.2,1), transform 280ms cubic-bezier(0.2,0.9,0.2,1);
+        }
+
+        /* When overlay is opening, slight upward motion can be applied by inline transform if desired */
+
         .profile-header {
             padding: calc(env(safe-area-inset-top) + 12px) 16px 8px 16px;
             display: flex;
@@ -549,12 +666,14 @@
         .profile-back-btn {
             width: 32px;
             height: 32px;
-            background: #1c1c1e;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(15px);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
+            border: 0.5px solid rgba(255, 255, 255, 0.15);
         }
 
         .profile-back-btn svg {
@@ -576,28 +695,26 @@
             gap: 16px;
         }
 
-        .profile-main-avatar {
-            width: 90px;
-            height: 90px;
-            border-radius: 50%;
-            background: linear-gradient(180deg, #686976 0%, #3a3a44 100%);
+        .profile-title-group {
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+            cursor: pointer;
+            transition: transform 0.1s ease;
+            padding: 4px 12px;
+            border-radius: 8px;
         }
 
-        .profile-main-avatar svg {
-            width: 52px;
-            height: 52px;
-            fill: #ffffff;
+        .profile-title-group:active {
+            transform: scale(0.94);
+            background: rgba(255, 255, 255, 0.05);
         }
 
         .profile-title {
             font-size: 28px;
             font-weight: 700;
             letter-spacing: -0.5px;
-            margin-top: -6px;
+            text-align: center;
         }
 
         .action-buttons-row {
@@ -611,7 +728,11 @@
         .action-circle-btn {
             width: 52px;
             height: 52px;
-            background: #1c1c1e;
+            background: rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 0.5px solid var(--glass-border);
+            box-shadow: var(--glass-shadow);
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -622,13 +743,17 @@
         .action-circle-btn svg {
             width: 22px;
             height: 22px;
-            fill: var(--secondary-text);
+            fill: #ffffff;
         }
 
         .card-group {
             width: 100%;
-            background: var(--card-bg);
-            border-radius: 12px;
+            background: rgba(30, 30, 35, 0.45);
+            backdrop-filter: blur(25px) saturate(180%);
+            -webkit-backdrop-filter: blur(25px) saturate(180%);
+            border: 0.5px solid var(--glass-border);
+            box-shadow: var(--glass-shadow);
+            border-radius: 14px;
             overflow: hidden;
             display: flex;
             flex-direction: column;
@@ -662,7 +787,7 @@
         }
 
         .recent-tag {
-            background: #2c2c2e;
+            background: rgba(255, 255, 255, 0.12);
             color: #8e8e93;
             font-size: 10px;
             padding: 1px 4px;
@@ -686,15 +811,14 @@
             cursor: pointer;
         }
 
-        /* Toggle Switch iOS style */
         .toggle-switch {
             width: 51px;
             height: 31px;
-            background: #3a3a3c;
-            border-radius: 31px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 15.5px;
             position: relative;
             cursor: pointer;
-            transition: background 0.25s;
+            transition: background 0.25s cubic-bezier(0.25, 0.1, 0.25, 1);
         }
 
         .toggle-switch.active {
@@ -709,8 +833,8 @@
             position: absolute;
             top: 2px;
             left: 2px;
-            transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
-            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            transition: transform 0.25s cubic-bezier(0.25, 0.1, 0.25, 1);
+            box-shadow: 0 3px 8px rgba(0,0,0,0.3);
         }
 
         .toggle-switch.active .toggle-handle {
@@ -732,141 +856,50 @@
 </head>
 <body>
 
-<div class="app-container">
+<div class="app-container" id="appContainer">
+
+    <!-- Единая SVG-иконка пользователя для всех аватаров -->
+    <svg style="display: none;">
+        <symbol id="ios-avatar-icon" viewBox="0 0 24 24">
+            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+        </symbol>
+    </svg>
 
     <!-- 1. ЭКРАН СПИСКА ЧАТОВ -->
     <div class="screen active" id="chatsListScreen">
-        <div class="chats-header">
+        <!-- Шапка с динамическим фоном, проявляющимся только при скролле -->
+        <div class="chats-header" id="chatsHeader">
             <div class="chats-top-bar">
                 <div class="edit-btn">Изменить</div>
+
+                <!-- Компактный заголовок по центру шапки, левый алайн внутри блока (3 строки) -->
+                <div class="compact-title-group" id="compactTitle">
+                    <div class="compact-main">Сообщения</div>
+                    <div class="compact-sub">Синхронизация с iCloud</div>
+                    <div class="compact-sub muted">приостановлена</div>
+                </div>
+
                 <div class="filter-btn">
                     <svg viewBox="0 0 24 24"><path d="M3 6h18v2H3V6zm4 5h10v2H7v-2zm3 5h4v2h-4v-2z"/></svg>
                 </div>
             </div>
-            <div class="chats-title">Сообщения</div>
-            <div class="icloud-status">Синхронизация с iCloud приостановлена</div>
         </div>
 
-        <div class="chat-list">
-            <!-- Orange -->
-            <div class="chat-item">
-                <div class="unread-dot active"></div>
-                <div class="chat-avatar">
-                    <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
-                </div>
-                <div class="chat-details">
-                    <div class="chat-header-line">
-                        <div class="chat-name-group">Orange</div>
-                        <div class="chat-time-group">понедельник <svg viewBox="0 0 6 10"><path d="M1 1l4 4-4 4"/></svg></div>
-                    </div>
-                    <div class="chat-preview">Srok deistvia optsii 10 GB+150 natsionalinyh minut na 15 dnei istekaet segodnia v 23:59. Akt...</div>
-                </div>
+        <div class="chat-list" id="chatListContainer">
+            <!-- Крупный заголовок скроллится вместе со списком чатов -->
+            <div class="large-title-container" id="largeTitle">
+                <div class="chats-title">Сообщения</div>
+                <div class="icloud-status">Синхронизация с iCloud приостановлена</div>
             </div>
 
-            <!-- 7000 (Active Target Chat) -->
-            <div class="chat-item" id="openChat7000">
-                <div class="unread-dot"></div>
-                <div class="chat-avatar">
-                    <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
-                </div>
-                <div class="chat-details">
-                    <div class="chat-header-line">
-                        <div class="chat-name-group">7000</div>
-                        <div class="chat-time-group">18:39 <svg viewBox="0 0 6 10"><path d="M1 1l4 4-4 4"/></svg></div>
-                    </div>
-                    <div class="chat-preview">Electronnyi bilet no. 24027494... Tsena 7 MDL</div>
-                </div>
-            </div>
+            <!-- Небольшая разделительная линия под заголовком (не на всю ширину) -->
+            <div class="section-separator" aria-hidden="true"></div>
 
-            <!-- 1111 -->
-            <div class="chat-item">
-                <div class="unread-dot active"></div>
-                <div class="chat-avatar">
-                    <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
-                </div>
-                <div class="chat-details">
-                    <div class="chat-header-line">
-                        <div class="chat-name-group">1111</div>
-                        <div class="chat-time-group">воскресенье <svg viewBox="0 0 6 10"><path d="M1 1l4 4-4 4"/></svg></div>
-                    </div>
-                    <div class="chat-preview">Numarul dvs. a fost reincarcat cu succes cu 67.90 lei. Aveti in cont 75.59 lei. Perioada activ...</div>
-                </div>
-            </div>
+            <!-- Контейнер для списка сообщений -->
+            <div id="chatsItemsWrapper"></div>
 
-            <!-- RunPay -->
-            <div class="chat-item">
-                <div class="unread-dot"></div>
-                <div class="chat-avatar">
-                    <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
-                </div>
-                <div class="chat-details">
-                    <div class="chat-header-line">
-                        <div class="chat-name-group">RunPay</div>
-                        <div class="chat-time-group">суббота <svg viewBox="0 0 6 10"><path d="M1 1l4 4-4 4"/></svg></div>
-                    </div>
-                    <div class="chat-preview">Runpay verification code: 1488 SessionId: S67695242</div>
-                </div>
-            </div>
-
-            <!-- Telegram -->
-            <div class="chat-item">
-                <div class="unread-dot"></div>
-                <div class="chat-avatar">
-                    <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
-                </div>
-                <div class="chat-details">
-                    <div class="chat-header-line">
-                        <div class="chat-name-group">Telegram</div>
-                        <div class="chat-time-group">12.09.2026 <svg viewBox="0 0 6 10"><path d="M1 1l4 4-4 4"/></svg></div>
-                    </div>
-                    <div class="chat-preview">Telegram code: 1337</div>
-                </div>
-            </div>
-
-            <!-- FACEBOOK -->
-            <div class="chat-item">
-                <div class="unread-dot"></div>
-                <div class="chat-avatar">
-                    <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
-                </div>
-                <div class="chat-details">
-                    <div class="chat-header-line">
-                        <div class="chat-name-group">FACEBOOK</div>
-                        <div class="chat-time-group">03.09.2026 <svg viewBox="0 0 6 10"><path d="M1 1l4 4-4 4"/></svg></div>
-                    </div>
-                    <div class="chat-preview">22867— ваш код Instagram. Никому его не передавайте.</div>
-                </div>
-            </div>
-
-            <!-- Мамочка -->
-            <div class="chat-item">
-                <div class="unread-dot active"></div>
-                <div class="chat-avatar">
-                    <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=120&q=80" alt="Avatar">
-                </div>
-                <div class="chat-details">
-                    <div class="chat-header-line">
-                        <div class="chat-name-group">Мама</div>
-                        <div class="chat-time-group">31.08.2026 <svg viewBox="0 0 6 10"><path d="M1 1l4 4-4 4"/></svg></div>
-                    </div>
-                    <div class="chat-preview">Etot abonent zvonil vam 1 raz 31/08 v 10:23. Orange</div>
-                </div>
-            </div>
-
-            <!-- micb.md -->
-            <div class="chat-item">
-                <div class="unread-dot"></div>
-                <div class="chat-avatar">
-                    <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
-                </div>
-                <div class="chat-details">
-                    <div class="chat-header-line">
-                        <div class="chat-name-group">micb.md</div>
-                        <div class="chat-time-group">30.08.2026 <svg viewBox="0 0 6 10"><path d="M1 1l4 4-4 4"/></svg></div>
-                    </div>
-                    <div class="chat-preview">ATENTIE! Nu comunicati nimanui parola! Parola OTP: 563758 : Pentru securizarea contului in M...</div>
-                </div>
-            </div>
+            <!-- Небольшой отступ внизу списка -->
+            <div style="height:12px"></div>
         </div>
 
         <div class="search-float-bar">
@@ -876,7 +909,7 @@
     </div>
 
 
-    <!-- 2. ЭКРАН ЧАТА "7000" -->
+    <!-- 2. ЭКРАН ЧАТА -->
     <div class="screen hidden-right" id="chatScreen">
         <header class="chat-header">
             <div class="header-top">
@@ -885,11 +918,11 @@
                     <span class="badge">248</span>
                 </div>
                 <div class="contact-trigger" id="contactTrigger">
-                    <div class="contact-avatar-small">
-                        <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                    <div class="chat-header-avatar" id="chatHeaderAvatar">
+                        <svg><use href="#ios-avatar-icon"/></svg>
                     </div>
                     <div class="contact-name-small">
-                        7000
+                        <span id="chatHeaderName">7000</span>
                         <svg viewBox="0 0 6 10"><path d="M1 1l4 4-4 4"/></svg>
                     </div>
                 </div>
@@ -898,32 +931,7 @@
         </header>
 
         <main class="chat-body" id="chatBody">
-            <div class="meta-info">
-                <div class="meta-text">Текстовое сообщение • SMS</div>
-                <div class="meta-text">22 июня 2025 г., 18:39</div>
-            </div>
-
-            <!-- Первое сообщение -->
-            <div class="message-row sent">
-                <div class="bubble sent">2402</div>
-            </div>
-            <div class="message-row received">
-                <div class="bubble received">Vash zapros obrabatyvaetsea.</div>
-            </div>
-            <div class="message-row received">
-                <div class="bubble received">Electronnyi bilet no.<br><span class="blue-link">24027493</span><br>22.06.2025<br>Deistvitelen 1 chas (<span class="underline-text">s 18:39 do 19:39</span>)<br>Tsena 7 MDL<br>Bortovoi nomer 2402</div>
-            </div>
-
-            <!-- Второе сообщение -->
-            <div class="message-row sent" style="margin-top: 8px;">
-                <div class="bubble sent">2402</div>
-            </div>
-            <div class="message-row received">
-                <div class="bubble received">Vash zapros obrabatyvaetsea.</div>
-            </div>
-            <div class="message-row received">
-                <div class="bubble received">Electronnyi bilet no.<br><span class="blue-link">24027494</span><br>22.06.2025<br>Deistvitelen 1 chas (<span class="underline-text">s 18:39 do 19:39</span>)<br>Tsena 7 MDL<br>Bortovoi nomer 2402</div>
-            </div>
+            <!-- Динамические сообщения чата -->
         </main>
 
         <footer class="input-bar">
@@ -943,7 +951,7 @@
     </div>
 
 
-    <!-- 3. ЭКРАН ПРОФИЛЯ КОНТАКТА (kontakti.jpg) -->
+    <!-- 3. ЭКРАН ПРОФИЛЯ -->
     <div class="screen hidden-right" id="profileScreen">
         <div class="profile-header">
             <div class="profile-back-btn" id="backToChatFromProfile">
@@ -952,13 +960,14 @@
         </div>
 
         <div class="profile-body">
-            <div class="profile-main-avatar">
-                <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+            <div class="profile-avatar" id="profileAvatar">
+                <svg><use href="#ios-avatar-icon"/></svg>
             </div>
 
-            <div class="profile-title">7000</div>
+            <div class="profile-title-group" id="toggleNumberTitle">
+                <div class="profile-title" id="profileTitleName">7000</div>
+            </div>
 
-            <!-- Иконки действий -->
             <div class="action-buttons-row">
                 <div class="action-circle-btn">
                     <svg viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
@@ -971,20 +980,18 @@
                 </div>
             </div>
 
-            <!-- Карточка 1: Телефон -->
             <div class="card-group">
                 <div class="card-row">
                     <div class="card-row-left">
                         <div class="phone-label">телефон <span class="recent-tag">НЕДАВНИЙ</span></div>
-                        <div class="phone-number">7000</div>
+                        <div class="phone-number" id="profilePhoneNumber">7000</div>
                     </div>
-                    <div style="color: #8e8e93;">
+                    <div>
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="#8e8e93"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
                     </div>
                 </div>
             </div>
 
-            <!-- Карточка 2: Действия контакта -->
             <div class="card-group">
                 <div class="card-row">
                     <div class="row-blue-text">Создать контакт</div>
@@ -994,7 +1001,6 @@
                 </div>
             </div>
 
-            <!-- Карточка 3: Уведомления -->
             <div class="card-group">
                 <div class="card-row">
                     <div>Скрытие уведомлений</div>
@@ -1004,7 +1010,6 @@
                 </div>
             </div>
 
-            <!-- Карточка 4: Блокировка -->
             <div class="card-group">
                 <div class="card-row">
                     <div class="row-red-text">Заблокировать контакт</div>
@@ -1018,52 +1023,417 @@
 </div>
 
 <script>
-    // Навигация по экранам
+    // База данных всех чатов
+    const chatsData = [
+        {
+            id: 'orange',
+            name: 'Orange',
+            unread: true,
+            time: '19:42',
+            dateMeta: '22 июня 2025 г., 19:42',
+            preview: 'Srok deistvia optsii 10 GB+150 natsionalinyh minut na 15 dnei istekaet segodnia v 23:59...',
+            messages: [
+                { type: 'received', html: 'Srok deistvia optsii 10 GB+150 natsionalinyh minut na 15 dnei istekaet segodnia v 23:59. Pentru reincarcare accesati <span class="blue-link">orange.md</span>' }
+            ]
+        },
+        {
+            id: '7000',
+            name: '7000',
+            unread: false,
+            time: '18:39',
+            dateMeta: '22 июня 2025 г., 18:39',
+            isInteractiveTickets: true,
+            preview: 'Electronnyi bilet no. 24027493... Tsena 7 MDL',
+            messages: [
+                { type: 'sent', html: '2402' },
+                { type: 'received', html: 'Vash zapros obrabatyvaetsea.' },
+                { type: 'received', html: 'Electronnyi bilet no.<br><span class="blue-link">24027493</span><br>22.06.2025<br>Deistvitelen 1 chas (<span class="underline-text">s 18:39 do 19:39</span>)<br>Tsena 7 MDL<br>Bortovoi nomer 2402' }
+            ]
+        },
+        {
+            id: 'moldcell',
+            name: 'Moldcell',
+            unread: true,
+            time: '16:15',
+            dateMeta: '22 июня 2025 г., 16:15',
+            preview: 'Contul dvs. a fost suplimentat cu 100.0 MDL. Va multumim!',
+            messages: [
+                { type: 'received', html: 'Contul dvs. a fost suplimentat cu 100.0 MDL. Va multumim ca alegeti Moldcell!' }
+            ]
+        },
+        {
+            id: 'maib',
+            name: 'MAIB',
+            unread: false,
+            time: '14:02',
+            dateMeta: '22 июня 2025 г., 14:02',
+            preview: 'Plata Card *4821: 45.00 MDL; Linella; Rest: 1240.50 MDL',
+            messages: [
+                { type: 'received', html: 'Plata Card *4821: 45.00 MDL; Linella; Rest: 1240.50 MDL' }
+            ]
+        },
+        {
+            id: '1111',
+            name: '1111',
+            unread: true,
+            time: 'Вчера',
+            dateMeta: '21 июня 2025 г., 20:11',
+            preview: 'Numarul dvs. a fost reincarcat cu succes cu 67.90 lei. Aveti in cont 75.59 lei...',
+            messages: [
+                { type: 'received', html: 'Numarul dvs. a fost reincarcat cu succes cu 67.90 lei. Aveti in cont 75.59 lei. Valabil pana la 21.09.2025.' }
+            ]
+        },
+        {
+            id: 'micb',
+            name: 'MICB',
+            unread: false,
+            time: 'Вчера',
+            dateMeta: '21 июня 2025 г., 11:05',
+            preview: 'Codul dvs. de confirmare este: 849201. Nu il divulgati nikui!',
+            messages: [
+                { type: 'received', html: 'Codul dvs. de confirmare este: <span class="blue-link">849201</span>. Nu il divulgati nikui!' }
+            ]
+        },
+        {
+            id: 'yandex',
+            name: 'Yandex Go',
+            unread: false,
+            time: 'Суббота',
+            dateMeta: '20 июня 2025 г., 22:15',
+            preview: 'Водитель приедет через 3 мин. Белый Skoda Octavia, B 123 AB',
+            messages: [
+                { type: 'received', html: 'Водитель приедет через 3 мин. Белый Skoda Octavia, B 123 AB' }
+            ]
+        },
+        {
+            id: 'kaufland',
+            name: 'Kaufland',
+            unread: false,
+            time: 'Пятница',
+            dateMeta: '19 июня 2025 г., 09:30',
+            preview: 'Reduceri exclusive de pana la 40% doar in acest weekend! Vezi brosura...',
+            messages: [
+                { type: 'received', html: 'Reduceri exclusive de pana la 40% doar in acest weekend! Vezi brosura pe <span class="blue-link">kaufland.md</span>' }
+            ]
+        },
+        {
+            id: 'telegram',
+            name: 'Telegram',
+            unread: false,
+            time: '20.06.25',
+            dateMeta: '20 июня 2025 г., 15:40',
+            preview: 'Login code: 49201. Do not give this code to anyone, even if they say...',
+            messages: [
+                { type: 'received', html: 'Login code: 49201. Do not give this code to anyone, even if they say they are from Telegram!' }
+            ]
+        },
+        {
+            id: 'novaposhta',
+            name: 'Nova Poshta',
+            unread: false,
+            time: '18.06.25',
+            dateMeta: '18 июня 2025 г., 13:10',
+            preview: 'Coletul dvs. 590008392100 a ajuns la oficiul nr. 4. Va asteptam!',
+            messages: [
+                { type: 'received', html: 'Coletul dvs. 590008392100 a ajuns la oficiul nr. 4. Va asteptam!' }
+            ]
+        },
+        {
+            id: 'victoriabank',
+            name: 'Victoriabank',
+            unread: false,
+            time: '15.06.25',
+            dateMeta: '15 июня 2025 г., 17:05',
+            preview: 'Parola unica pentru tranzactia сu cardul *9912 este 501923.',
+            messages: [
+                { type: 'received', html: 'Parola unica pentru tranzactia сu cardul *9912 este 501923.' }
+            ]
+        },
+        {
+            id: '14000',
+            name: '14000',
+            unread: false,
+            time: '10.06.25',
+            dateMeta: '10 июня 2025 г., 08:00',
+            preview: 'Ati fost abonat la serviciul Info-Trafic. Cost 2 MDL/zi. Pentru dezabonare...',
+            messages: [
+                { type: 'received', html: 'Ati fost abonat la serviciul Info-Trafic. Cost 2 MDL/zi. Pentru dezabonare trimiteti STOP.' }
+            ]
+        },
+        {
+            id: 'apple',
+            name: 'Apple',
+            unread: false,
+            time: '01.06.25',
+            dateMeta: '01 июня 2025 г., 12:00',
+            preview: 'Ваш код Apple ID: 930-182. Не сообщайте его никому.',
+            messages: [
+                { type: 'received', html: 'Ваш код Apple ID: 930-182. Не сообщайте его никому.' }
+            ]
+        }
+    ];
+
+    const appContainer = document.getElementById('appContainer');
     const chatsListScreen = document.getElementById('chatsListScreen');
     const chatScreen = document.getElementById('chatScreen');
     const profileScreen = document.getElementById('profileScreen');
+    const chatListContainer = document.getElementById('chatListContainer');
+    
+    const chatsHeader = document.getElementById('chatsHeader');
+    const compactTitle = document.getElementById('compactTitle');
+    const largeTitle = document.getElementById('largeTitle');
+    const chatsTopBar = document.querySelector('.chats-top-bar');
+    const editBtnEl = document.querySelector('.edit-btn');
+    const filterBtnEl = document.querySelector('.filter-btn');
 
-    const openChat7000 = document.getElementById('openChat7000');
     const backToChats = document.getElementById('backToChats');
     const contactTrigger = document.getElementById('contactTrigger');
     const backToChatFromProfile = document.getElementById('backToChatFromProfile');
 
-    // Элементы ввода
+    const toggleNumberTitle = document.getElementById('toggleNumberTitle');
+    const chatHeaderName = document.getElementById('chatHeaderName');
+    const profileTitleName = document.getElementById('profileTitleName');
+    const profilePhoneNumber = document.getElementById('profilePhoneNumber');
+    const chatHeaderAvatar = document.getElementById('chatHeaderAvatar');
+    const profileAvatar = document.getElementById('profileAvatar');
+    const chatBody = document.getElementById('chatBody');
+
     const msgInput = document.getElementById('msgInput');
     const sendBtn = document.getElementById('sendBtn');
     const micBtn = document.getElementById('micBtn');
-    const chatBody = document.getElementById('chatBody');
 
-    let ticketCounter = 24027495;
+    let currentChat = null;
+    let ticketCounter = 24027494;
 
-    // Переходы экранов
-    openChat7000.addEventListener('click', () => {
-        chatsListScreen.className = 'screen hidden-left';
-        chatScreen.className = 'screen active';
+    // Плавная трансформация заголовка СЛЕВА и динамическое размытие жидкого стекла
+    const maxScroll = 50;
+
+    chatListContainer.addEventListener('scroll', () => {
+        const scrollTop = chatListContainer.scrollTop;
+        const scrollThreshold = 42; // Дистанция скрытия большого текста
+        const progress = Math.min(1, Math.max(0, scrollTop / scrollThreshold));
+
+        // 1. Управление фоном и подложкой жидкого стекла шапки
+        if (progress > 0) {
+            const glassAlpha = 0.65 * progress;
+            const blurAmount = 25 * progress;
+            chatsHeader.style.background = `rgba(20, 20, 25, ${glassAlpha})`;
+            chatsHeader.style.backdropFilter = `blur(${blurAmount}px) saturate(190%)`;
+            chatsHeader.style.webkitBackdropFilter = `blur(${blurAmount}px) saturate(190%)`;
+            chatsHeader.style.borderColor = `rgba(255, 255, 255, ${0.12 * progress})`;
+        } else {
+            // Когда сверху отображается большой текст — фона и блюра нет
+            chatsHeader.style.background = 'rgba(20, 20, 25, 0)';
+            chatsHeader.style.backdropFilter = 'blur(0px) saturate(100%)';
+            chatsHeader.style.webkitBackdropFilter = 'blur(0px) saturate(100%)';
+            chatsHeader.style.borderColor = 'rgba(255, 255, 255, 0)';
+        }
+
+        // 2. Эффект Motion Blur при размытии большого текста в скролле
+        largeTitle.style.opacity = `${1 - progress}`;
+        largeTitle.style.filter = `blur(${progress * 12}px)`;
+        largeTitle.style.transform = `translateY(${ -progress * 8 }px)`;
+
+        // 3. Эффект Motion Blur при появлении центрального текста в шапке — единый контролируемый блок
+        compactTitle.style.opacity = `${progress}`;
+        compactTitle.style.filter = `blur(${(1 - progress) * 12}px)`;
+        // Небольшой сдвиг вверх при появлении для ощущения движения (motion)
+        compactTitle.style.transform = `translate(-50%, calc(-50% - ${progress * 6}px))`;
     });
 
+    // Функция отрисовки иконки
+    function getAvatarSVG() {
+        return `<svg><use href="#ios-avatar-icon"/></svg>`;
+    }
+
+    // Рендер списка чатов
+    function renderChatList() {
+        const chatsItemsWrapper = document.getElementById('chatsItemsWrapper');
+        if (!chatsItemsWrapper) return;
+        
+        chatsItemsWrapper.innerHTML = '';
+        chatsData.forEach(chat => {
+            const item = document.createElement('div');
+            item.className = 'chat-item';
+            item.onclick = () => openChat(chat.id);
+
+            item.innerHTML = `
+                <div class="unread-dot ${chat.unread ? 'active' : ''}"></div>
+                <div class="avatar">${getAvatarSVG()}</div>
+                <div class="chat-details">
+                    <div class="chat-header-line">
+                        <div class="chat-name-group">${chat.name}</div>
+                        <div class="chat-time-group">${chat.time} <svg viewBox="0 0 6 10"><path d="M1 1l4 4-4 4"/></svg></div>
+                    </div>
+                    <div class="chat-preview">${chat.preview}</div>
+                </div>
+            `;
+            chatsItemsWrapper.appendChild(item);
+        });
+    }
+
+    // Открытие чата
+    function openChat(chatId) {
+        const chat = chatsData.find(c => c.id === chatId);
+        if (!chat) return;
+
+        currentChat = chat;
+        chat.unread = false;
+        renderChatList();
+
+        chatHeaderName.textContent = chat.name;
+        profileTitleName.textContent = chat.name;
+        profilePhoneNumber.textContent = chat.name;
+
+        chatHeaderAvatar.innerHTML = getAvatarSVG();
+        profileAvatar.innerHTML = getAvatarSVG();
+
+        if (chat.id === '7000') {
+            toggleNumberTitle.style.pointerEvents = 'auto';
+        } else {
+            toggleNumberTitle.style.pointerEvents = 'none';
+        }
+
+        chatBody.innerHTML = `
+            <div class="meta-info">
+                <div class="meta-text">Текстовое сообщение • SMS</div>
+                <div class="meta-text">${chat.dateMeta || '22 июня 2025 г.'}</div>
+            </div>
+        `;
+
+        chat.messages.forEach(m => {
+            const row = document.createElement('div');
+            row.className = `message-row ${m.type}`;
+            row.innerHTML = `<div class="bubble ${m.type}">${m.html}</div>`;
+            chatBody.appendChild(row);
+        });
+
+        resetInlineStyles(chatsListScreen, chatScreen);
+        chatsListScreen.className = 'screen hidden-left';
+        chatScreen.className = 'screen active';
+        scrollToBottom();
+    }
+
+    function resetInlineStyles(...screens) {
+        screens.forEach(s => {
+            s.style.transform = '';
+            s.style.opacity = '';
+        });
+    }
+
     backToChats.addEventListener('click', () => {
+        resetInlineStyles(chatsListScreen, chatScreen);
         chatScreen.className = 'screen hidden-right';
         chatsListScreen.className = 'screen active';
     });
 
     contactTrigger.addEventListener('click', () => {
-        chatScreen.className = 'screen hidden-left';
-        profileScreen.className = 'screen active';
+        // Open profile as an overlay on top of the current chat without moving the chat screen
+        resetInlineStyles(profileScreen);
+        // Keep the chatScreen as-is and show profileScreen as an overlay
+        profileScreen.className = 'screen active overlay';
     });
 
     backToChatFromProfile.addEventListener('click', () => {
+        // Close overlay profile and leave chat screen untouched
+        resetInlineStyles(profileScreen);
         profileScreen.className = 'screen hidden-right';
-        chatScreen.className = 'screen active';
+        // ensure chatScreen remains active (no slide animation)
+        if (!chatScreen.classList.contains('active')) chatScreen.className = 'screen active';
     });
 
-    // Переключатель скрытия уведомлений
+    toggleNumberTitle.addEventListener('click', () => {
+        if (!currentChat || currentChat.id !== '7000') return;
+        const newNum = chatHeaderName.textContent === '7000' ? '7001' : '7000';
+        chatHeaderName.textContent = newNum;
+        profileTitleName.textContent = newNum;
+        profilePhoneNumber.textContent = newNum;
+    });
+
+    // Жесты свайпа назад
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let isSwiping = false;
+    let activeScreen = null;
+    let backgroundScreen = null;
+    let containerWidth = 0;
+
+    appContainer.addEventListener('touchstart', (e) => {
+        const touch = e.touches[0];
+        touchStartX = touch.clientX;
+        touchStartY = touch.clientY;
+
+        if (touchStartX <= 45) {
+            if (profileScreen.classList.contains('active')) {
+                activeScreen = profileScreen;
+                backgroundScreen = chatScreen;
+                isSwiping = true;
+            } else if (chatScreen.classList.contains('active')) {
+                activeScreen = chatScreen;
+                backgroundScreen = chatsListScreen;
+                isSwiping = true;
+            }
+
+            if (isSwiping) {
+                containerWidth = appContainer.offsetWidth;
+                activeScreen.classList.add('no-transition');
+                backgroundScreen.classList.add('no-transition');
+            }
+        }
+    }, { passive: true });
+
+    appContainer.addEventListener('touchmove', (e) => {
+        if (!isSwiping) return;
+
+        const touch = e.touches[0];
+        const deltaX = touch.clientX - touchStartX;
+        const deltaY = touch.clientY - touchStartY;
+
+        if (deltaX > 0 && Math.abs(deltaX) > Math.abs(deltaY)) {
+            const translatePercent = (deltaX / containerWidth) * 100;
+            const bgTranslatePercent = -30 + (deltaX / containerWidth) * 30;
+
+            activeScreen.style.transform = `translateX(${translatePercent}%)`;
+            backgroundScreen.style.transform = `translateX(${bgTranslatePercent}%)`;
+            backgroundScreen.style.opacity = `${0.7 + (deltaX / containerWidth) * 0.3}`;
+        }
+    }, { passive: true });
+
+    appContainer.addEventListener('touchend', (e) => {
+        if (!isSwiping) return;
+        isSwiping = false;
+
+        const touch = e.changedTouches[0];
+        const deltaX = touch.clientX - touchStartX;
+
+        activeScreen.classList.remove('no-transition');
+        backgroundScreen.classList.remove('no-transition');
+        resetInlineStyles(activeScreen, backgroundScreen);
+
+        if (deltaX > containerWidth * 0.25) {
+            if (activeScreen === profileScreen) {
+                profileScreen.className = 'screen hidden-right';
+                chatScreen.className = 'screen active';
+            } else if (activeScreen === chatScreen) {
+                chatScreen.className = 'screen hidden-right';
+                chatsListScreen.className = 'screen active';
+            }
+        } else {
+            if (activeScreen === profileScreen) {
+                profileScreen.className = 'screen active';
+                chatScreen.className = 'screen hidden-left';
+            } else if (activeScreen === chatScreen) {
+                chatScreen.className = 'screen active';
+                chatsListScreen.className = 'screen hidden-left';
+            }
+        }
+    });
+
     const toggleNotify = document.getElementById('toggleNotify');
     toggleNotify.addEventListener('click', () => {
         toggleNotify.classList.toggle('active');
     });
 
-    // Управление кнопкой отправки
     msgInput.addEventListener('input', () => {
         if (msgInput.value.trim().length > 0) {
             sendBtn.style.display = 'flex';
@@ -1092,54 +1462,83 @@
     }
 
     function sendMessage() {
-        const code = msgInput.value.trim();
-        if (!code) return;
+        const text = msgInput.value.trim();
+        if (!text || !currentChat) return;
 
-        // 1. Сообщение пользователя
         const userRow = document.createElement('div');
         userRow.className = 'message-row sent';
-        userRow.innerHTML = `<div class="bubble sent">${code}</div>`;
+        userRow.innerHTML = `<div class="bubble sent">${text}</div>`;
         chatBody.appendChild(userRow);
+
+        currentChat.messages.push({ type: 'sent', html: text });
+        currentChat.preview = text;
+        renderChatList();
 
         msgInput.value = '';
         sendBtn.style.display = 'none';
         micBtn.style.display = 'flex';
         scrollToBottom();
 
-        // 2. Ответ "Vash zapros obrabatyvaetsea."
-        setTimeout(() => {
-            const procRow = document.createElement('div');
-            procRow.className = 'message-row received';
-            procRow.innerHTML = `<div class="bubble received">Vash zapros obrabatyvaetsea.</div>`;
-            chatBody.appendChild(procRow);
-            scrollToBottom();
-
-            // 3. Билет на 7 MDL
+        if (currentChat.isInteractiveTickets) {
             setTimeout(() => {
-                const now = new Date();
-                const afterHour = new Date(now.getTime() + 60 * 60 * 1000);
-
-                const dateStr = formatDate(now);
-                const startTimeStr = formatTime(now);
-                const endTimeStr = formatTime(afterHour);
-                const currentTicketNo = ticketCounter++;
-
-                const ticketRow = document.createElement('div');
-                ticketRow.className = 'message-row received';
-                ticketRow.innerHTML = `
-                    <div class="bubble received">Electronnyi bilet no.<br><span class="blue-link">${currentTicketNo}</span><br>${dateStr}<br>Deistvitelen 1 chas (<span class="underline-text">s ${startTimeStr} do ${endTimeStr}</span>)<br>Tsena 7 MDL<br>Bortovoi nomer ${code}</div>
-                `;
-                chatBody.appendChild(ticketRow);
+                const procRow = document.createElement('div');
+                procRow.className = 'message-row received';
+                procRow.innerHTML = `<div class="bubble received">Vash zapros obrabatyvaetsea.</div>`;
+                chatBody.appendChild(procRow);
                 scrollToBottom();
-            }, 800);
 
-        }, 400);
+                setTimeout(() => {
+                    const ticketTime = new Date();
+                    const afterHour = new Date(ticketTime.getTime() + 60 * 60 * 1000);
+
+                    const dateStr = formatDate(ticketTime);
+                    const startTimeStr = formatTime(ticketTime);
+                    const endTimeStr = formatTime(afterHour);
+                    const currentTicketNo = ticketCounter++;
+
+                    const ticketHtml = `Electronnyi bilet no.<br><span class="blue-link">${currentTicketNo}</span><br>${dateStr}<br>Deistvitelen 1 chas (<span class="underline-text">s ${startTimeStr} do ${endTimeStr}</span>)<br>Tsena 7 MDL<br>Bortovoi nomer ${text}`;
+
+                    const ticketRow = document.createElement('div');
+                    ticketRow.className = 'message-row received';
+                    ticketRow.innerHTML = `<div class="bubble received">${ticketHtml}</div>`;
+                    chatBody.appendChild(ticketRow);
+
+                    currentChat.messages.push({ type: 'received', html: ticketHtml });
+                    currentChat.preview = `Electronnyi bilet no. ${currentTicketNo}...`;
+                    renderChatList();
+                    scrollToBottom();
+                }, 800);
+
+            }, 400);
+        }
     }
 
     sendBtn.addEventListener('click', sendMessage);
     msgInput.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') sendMessage();
     });
+
+    renderChatList();
+    // Инициализация состояния шапки (установить правильный фон/блюр и заголовки)
+    if (chatListContainer) chatListContainer.dispatchEvent(new Event('scroll'));
+
+    // Align compact title vertically with the edit and filter buttons
+    function alignCompactTitleWithButtons() {
+        if (!compactTitle || !editBtnEl || !chatsTopBar) return;
+        // Use the center of the edit button as the vertical anchor
+        const topBarRect = chatsTopBar.getBoundingClientRect();
+        const editRect = editBtnEl.getBoundingClientRect();
+        const anchorCenter = editRect.top + editRect.height / 2;
+        const relative = anchorCenter - topBarRect.top; // px from top of top-bar
+        const verticalOffset = 6; // shift compact title slightly lower (px)
+        compactTitle.style.top = `${relative + verticalOffset}px`;
+    }
+
+    // Run alignment now and on resize (and also after fonts/layout settle)
+    alignCompactTitleWithButtons();
+    window.addEventListener('resize', alignCompactTitleWithButtons);
+    // small timeout to align after fonts load/layout
+    setTimeout(alignCompactTitleWithButtons, 120);
 </script>
 
 </body>
