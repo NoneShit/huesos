@@ -1145,8 +1145,8 @@
 </div>
 
 <script>
-    // База данных всех чатов
-    const chatsData = [
+    // Начальные данные (используются при первом запуске)
+    const initialChatsData = [
         {
             id: 'orange',
             name: 'Orange',
@@ -1309,6 +1309,28 @@
         }
     ];
 
+    // Загрузка сохраненных данных или инициализация базовых
+    let chatsData = [];
+    try {
+        const savedData = localStorage.getItem('ios_chats_data');
+        if (savedData) {
+            chatsData = JSON.parse(savedData);
+        } else {
+            chatsData = initialChatsData;
+        }
+    } catch(e) {
+        chatsData = initialChatsData;
+    }
+
+    // Функция сохранения текущего состояния в localStorage
+    function saveChatsData() {
+        try {
+            localStorage.setItem('ios_chats_data', JSON.stringify(chatsData));
+        } catch(e) {
+            console.error('Ошибка сохранения данных:', e);
+        }
+    }
+
     const appContainer = document.getElementById('appContainer');
     const chatsListScreen = document.getElementById('chatsListScreen');
     const chatScreen = document.getElementById('chatScreen');
@@ -1404,6 +1426,7 @@
 
         currentChat = chat;
         chat.unread = false;
+        saveChatsData();
         renderChatList();
 
         chatHeaderName.textContent = chat.name;
@@ -1505,6 +1528,7 @@
         const idx = chatsData.findIndex(c => c.id === currentChat.id);
         if (idx !== -1) chatsData[idx].name = newNum;
 
+        saveChatsData();
         renderChatList();
     });
 
@@ -1695,6 +1719,8 @@
         appendMessageToDOM(sentMsg);
 
         currentChat.preview = text;
+        currentChat.time = formatTime(new Date(now));
+        saveChatsData();
         renderChatList();
 
         msgInput.value = '';
@@ -1706,6 +1732,7 @@
                 const procMsg = { type: 'received', html: 'Vash zapros obrabatyvaetsea.', timestamp: Date.now() };
                 currentChat.messages.push(procMsg);
                 appendMessageToDOM(procMsg);
+                saveChatsData();
 
                 setTimeout(() => {
                     const ticketTime = new Date();
@@ -1727,6 +1754,8 @@
                     appendMessageToDOM(ticketMsg);
 
                     currentChat.preview = `Electronnyi bilet no. ${currentTicketNo}...`;
+                    currentChat.time = formatTime(ticketTime);
+                    saveChatsData();
                     renderChatList();
                 }, 800);
 
@@ -1800,6 +1829,7 @@
         menu.querySelector('.delete-chat').addEventListener('click', () => {
             const i = chatsData.findIndex(c => c.id === chat.id);
             if (i !== -1) chatsData.splice(i,1);
+            saveChatsData();
             menu.remove();
             renderChatList();
         });
@@ -1814,6 +1844,7 @@
                 currentChat.messages = [];
                 chatBody.innerHTML = '';
             }
+            saveChatsData();
             menu.remove();
             renderChatList();
         });
