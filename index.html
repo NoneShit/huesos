@@ -101,7 +101,6 @@
         .avatar, .chat-header-avatar, .profile-avatar {
             position: relative;
             border-radius: 50%;
-            /* richer gradient similar to reference image */
             background: linear-gradient(135deg, #2f2f31 0%, #3b3b3d 45%, #262628 100%);
             border: 0.5px solid rgba(255, 255, 255, 0.12);
             display: flex;
@@ -132,7 +131,6 @@
             box-shadow: 0 8px 28px rgba(0, 0, 0, 0.55);
         }
 
-        /* subtle glint/oval inside avatar near the bottom to match reference */
         .avatar::after, .chat-header-avatar::after, .profile-avatar::after {
             content: "";
             position: absolute;
@@ -146,7 +144,6 @@
             pointer-events: none;
         }
 
-        /* Увеличенный размер самой иконки человека внутри аватара */
         .avatar svg, .chat-header-avatar svg, .profile-avatar svg {
             fill: #ffffff;
             width: 72%;
@@ -154,12 +151,11 @@
         }
 
         /* --- 1. ЭКРАН СПИСКА ЧАТОВ --- */
-        /* Изначально шапка полностью прозрачная, без фона и размытия */
         .chats-header {
             position: sticky;
             top: 0;
             padding-top: calc(env(safe-area-inset-top) + 8px);
-            padding-bottom: 4px; /* reduced to raise chats */
+            padding-bottom: 4px;
             padding-left: 16px;
             padding-right: 16px;
             background: rgba(20, 20, 25, 0);
@@ -179,7 +175,6 @@
             min-height: 38px;
         }
 
-        /* Кнопки в шапке (вернуть фон для Edit и стилевую кнопку сортировки) */
         .edit-btn {
             color: #ffffff;
             font-size: 18px;
@@ -227,12 +222,11 @@
             fill: #ffffff;
         }
 
-        /* Компактный заголовок по центру шапки (появляется с моушен блюром при скролле) */
         .compact-title-group {
             position: absolute;
-            left: 56%; /* nudge more to the right */
+            left: 56%;
             top: 50%;
-            transform: translate(-36%, -50%); /* move visually to the right */
+            transform: translate(-36%, -50%);
             display: flex;
             flex-direction: column;
             align-items: flex-start;
@@ -242,7 +236,7 @@
             filter: blur(10px);
             will-change: opacity, filter, transform;
             width: auto;
-            max-width: calc(100% - 160px); /* reserve space for left/right buttons to avoid overlap on small screens */
+            max-width: calc(100% - 160px);
             transition: opacity 180ms linear, filter 180ms linear, transform 180ms linear;
             overflow: hidden;
             word-wrap: break-word;
@@ -257,11 +251,11 @@
         }
 
         .compact-title-group .compact-sub {
-            font-size: 10px; /* ещё меньше */
+            font-size: 10px;
             color: #bdbdbf;
             font-weight: 400;
             line-height: 1.05;
-            margin-top: 2px; /* сдвинуть вниз на пару пикселей */
+            margin-top: 2px;
         }
 
         .compact-title-group .compact-sub.muted {
@@ -269,9 +263,8 @@
             color: #a9a9ad;
         }
 
-        /* Крупный заголовок под шапкой (внутри скролл-контейнера) */
         .large-title-container {
-            padding: 6px 16px 2px 16px; /* slightly lower large title and reduce bottom spacing */
+            padding: 6px 16px 2px 16px;
             display: flex;
             flex-direction: column;
             gap: 2px;
@@ -295,25 +288,22 @@
             line-height: 1.2;
         }
 
-        /* Small centered separator under the large title */
         .section-separator {
             width: 82%;
             height: 1px;
             background: rgba(255, 255, 255, 0.14);
-            margin: 6px auto 6px auto; /* reduce space to bring title closer to chats */
+            margin: 6px auto 6px auto;
             border-radius: 1px;
         }
 
-        /* Date divider that appears between messages when 24h+ gap */
         .date-divider {
             text-align: center;
             color: var(--secondary-text);
-            font-size: 13px; /* slightly larger to match reference */
-            margin: 14px 0 8px 0; /* more space above to separate clusters */
+            font-size: 13px;
+            margin: 14px 0 8px 0;
             pointer-events: none;
         }
 
-        /* Keep markup compatibility but render as plain centered text (no pill background) */
         .date-divider .pill {
             display: inline-block;
             background: transparent;
@@ -364,7 +354,7 @@
             display: flex;
             flex-direction: column;
             gap: 3px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.12); /* thicker separators */
+            border-bottom: 1px solid rgba(255, 255, 255, 0.12);
             padding-bottom: 10px;
             min-width: 0;
         }
@@ -407,7 +397,6 @@
             color: var(--secondary-text);
             font-size: 14px;
             line-height: 1.2;
-            /* allow up to 2 lines preview */
             display: -webkit-box;
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
@@ -418,12 +407,12 @@
 
         .search-float-bar {
             position: absolute;
-            bottom: calc(env(safe-area-inset-bottom) + 4px); /* moved yet higher */
+            bottom: calc(env(safe-area-inset-bottom) + 4px);
             left: 50%;
             transform: translateX(-50%);
             background: transparent;
             border-radius: 28px;
-            padding: 0; /* inner element handles padding */
+            padding: 0;
             display: flex;
             align-items: center;
             gap: 12px;
@@ -445,15 +434,14 @@
             backdrop-filter: blur(25px) saturate(180%);
             -webkit-backdrop-filter: blur(25px) saturate(180%);
             border-radius: 25px;
-            padding: 0 12px; /* vertical sizing handled by explicit height */
+            padding: 0 12px;
             border: 0.5px solid var(--glass-border);
             box-shadow: var(--glass-shadow);
             flex: 1 1 auto;
             min-width: 0;
-            height: 44px; /* make panel height explicit so compose icon can match it */
+            height: 44px;
         }
 
-        /* main magnifier on the left inside the glass - larger and white */
         .search-bg > svg {
             width: 22px;
             height: 22px;
@@ -473,10 +461,8 @@
         }
 
         .search-actions { display: none; }
-
         .search-action { display: none; }
 
-        /* Microphone: no background, white icon (inside the glass) */
         .mic-action {
             background: transparent;
             border: none;
@@ -491,7 +477,6 @@
             fill: #ffffff;
         }
 
-        /* Compose/edit remains outside the glass */
         .compose-action {
             width: 42px;
             height: 36px;
@@ -530,13 +515,12 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            /* make header background transparent so chat doesn't have solid glass behind avatar/name */
             background: transparent;
             backdrop-filter: none;
             -webkit-backdrop-filter: none;
             border-bottom: none;
             padding-top: calc(env(safe-area-inset-top) + 8px);
-            padding-bottom: 6px; /* reduced padding to remove extra space */
+            padding-bottom: 6px;
         }
 
         .header-top {
@@ -589,7 +573,7 @@
             display: flex;
             align-items: center;
             gap: 3px;
-            padding-left: 6px; /* nudge small text slightly right */
+            padding-left: 6px;
         }
 
         .contact-name-small svg {
@@ -646,7 +630,7 @@
             position: relative;
             max-width: 78%;
             padding: 12px 16px;
-            border-radius: 22px; /* large rounded corners like reference */
+            border-radius: 22px;
             font-size: 15px;
             line-height: 1.28;
             letter-spacing: -0.2px;
@@ -663,19 +647,16 @@
         }
 
         .bubble.received {
-            background-color: #2f2f33; /* slightly lighter dark grey to match image */
+            background-color: #2f2f33;
             color: #ffffff;
             border-bottom-left-radius: 8px;
             border: 0.5px solid rgba(255, 255, 255, 0.04);
         }
 
-        /* Remove decorative tail — keep bubbles simple with a sharper bottom corner via border radius adjustments */
         .bubble.received::after,
         .bubble.sent::after {
             display: none;
         }
-
-        /* If a sharper lower corner is needed, keep border radiuses adjusted above (.bubble.sent/.bubble.received) */
 
         .blue-link { color: var(--link-blue); text-decoration: underline; }
         .underline-text { text-decoration: underline; }
@@ -773,7 +754,6 @@
             z-index: 20;
         }
 
-        /* Overlay modifier for showing a screen over another without sliding the background */
         .screen.overlay {
             transform: translateY(0) !important;
             opacity: 1 !important;
@@ -781,8 +761,6 @@
             z-index: 40 !important;
             transition: opacity 280ms cubic-bezier(0.2,0.9,0.2,1), transform 280ms cubic-bezier(0.2,0.9,0.2,1);
         }
-
-        /* When overlay is opening, slight upward motion can be applied by inline transform if desired */
 
         .profile-header {
             padding: calc(env(safe-area-inset-top) + 12px) 16px 8px 16px;
@@ -939,10 +917,10 @@
         }
 
         .toggle-switch {
-            width: 51px; /* keep length the same */
-            height: 22px; /* flattened vertically */
+            width: 51px;
+            height: 22px;
             background: rgba(255, 255, 255, 0.2);
-            border-radius: 11px; /* half of new height */
+            border-radius: 11px;
             position: relative;
             cursor: pointer;
             transition: background 0.25s cubic-bezier(0.25, 0.1, 0.25, 1), transform 0.25s ease;
@@ -953,18 +931,17 @@
         }
 
         .toggle-handle {
-            width: 24px; /* slightly longer knob */
-            height: 14px; /* flattened oval */
+            width: 24px;
+            height: 14px;
             background: #ffffff;
-            border-radius: 8px; /* pill shape */
+            border-radius: 8px;
             position: absolute;
-            top: 4px; /* center vertically inside 22px container */
-            left: 3px; /* equal inset from left and right when active */
+            top: 4px;
+            left: 3px;
             transition: transform 0.25s cubic-bezier(0.25, 0.1, 0.25, 1);
             box-shadow: 0 3px 8px rgba(0,0,0,0.3);
         }
 
-        /* Move handle to the right edge when active. translateX = containerWidth - handleWidth - leftInset*2 = 51 - 24 - 6 = 21 */
         .toggle-switch.active .toggle-handle {
             transform: translateX(21px);
         }
@@ -981,16 +958,15 @@
             color: var(--link-blue);
         }
 
-
-    @media (max-width: 420px) {
-        .compact-title-group {
-            max-width: calc(100% - 110px);
-            transform: translate(-30%, -50%); /* on small screens shift more to the right */
-            left: 58%;
+        @media (max-width: 420px) {
+            .compact-title-group {
+                max-width: calc(100% - 110px);
+                transform: translate(-30%, -50%);
+                left: 58%;
+            }
+            .chats-top-bar { padding: 0 8px; }
+            .edit-btn { padding: 6px 12px; font-size: 16px; }
         }
-        .chats-top-bar { padding: 0 8px; }
-        .edit-btn { padding: 6px 12px; font-size: 16px; }
-    }
     </style>
 </head>
 <body>
@@ -1006,12 +982,10 @@
 
     <!-- 1. ЭКРАН СПИСКА ЧАТОВ -->
     <div class="screen active" id="chatsListScreen">
-        <!-- Шапка с динамическим фоном, проявляющимся только при скролле -->
         <div class="chats-header" id="chatsHeader">
             <div class="chats-top-bar">
                 <div class="edit-btn">Изменить</div>
 
-                <!-- Компактный заголовок по центру шапки, левый алайн внутри блока (3 строки) -->
                 <div class="compact-title-group" id="compactTitle">
                     <div class="compact-main">Сообщения</div>
                     <div class="compact-sub">Синхронизация с iCloud</div>
@@ -1025,19 +999,15 @@
         </div>
 
         <div class="chat-list" id="chatListContainer">
-            <!-- Крупный заголовок скроллится вместе со списком чатов -->
             <div class="large-title-container" id="largeTitle">
                 <div class="chats-title">Сообщения</div>
                 <div class="icloud-status">Синхронизация с iCloud приостановлена</div>
             </div>
 
-            <!-- Небольшая разделительная линия под заголовком (не на всю ширину) -->
             <div class="section-separator" aria-hidden="true"></div>
 
-            <!-- Контейнер для списка сообщений -->
             <div id="chatsItemsWrapper"></div>
 
-            <!-- Небольшой отступ внизу списка -->
             <div style="height:12px"></div>
         </div>
 
@@ -1168,7 +1138,6 @@
                 </div>
             </div>
 
-
             <div class="encryption-note">Этот разговор не зашифрован. <span>Подробнее...</span></div>
         </div>
     </div>
@@ -1201,6 +1170,20 @@
                 { type: 'sent', html: '2402' },
                 { type: 'received', html: 'Vash zapros obrabatyvaetsea.' },
                 { type: 'received', html: 'Electronnyi bilet no.<br><span class="blue-link">24027493</span><br>22.06.2025<br>Deistvitelen 1 chas (<span class="underline-text">s 18:39 do 19:39</span>)<br>Tsena 7 MDL<br>Bortovoi nomer 2402' }
+            ]
+        },
+        {
+            id: '7001',
+            name: '7001',
+            unread: false,
+            time: '18:39',
+            dateMeta: '22 июня 2025 г., 18:39',
+            isInteractiveTickets: true,
+            preview: 'Electronnyi bilet no. 09317493... Tsena 7 MDL',
+            messages: [
+                { type: 'sent', html: '0931' },
+                { type: 'received', html: 'Vash zapros obrabatyvaetsea.' },
+                { type: 'received', html: 'Electronnyi bilet no.<br><span class="blue-link">09317493</span><br>22.06.2025<br>Deistvitelen 1 chas (<span class="underline-text">s 18:39 do 19:39</span>)<br>Tsena 7 MDL<br>Bortovoi nomer 0931' }
             ]
         },
         {
@@ -1358,47 +1341,38 @@
     let currentChat = null;
     let ticketCounter = 24027494;
 
-    // Плавная трансформация заголовка СЛЕВА и динамическое размытие жидкого стекла
     const maxScroll = 50;
 
     chatListContainer.addEventListener('scroll', () => {
         const scrollTop = chatListContainer.scrollTop;
-        const scrollThreshold = 42; // Дистанция скрытия большого текста
+        const scrollThreshold = 42;
         const progress = Math.min(1, Math.max(0, scrollTop / scrollThreshold));
 
-        // 1. Управление фоном и подложкой жидкого стекла шапки
         if (progress > 0) {
-            // чисто чёрный фон без обводки при скролле
             chatsHeader.style.background = '#000000';
             chatsHeader.style.backdropFilter = '';
             chatsHeader.style.webkitBackdropFilter = '';
             chatsHeader.style.borderColor = 'transparent';
         } else {
-            // Когда сверху отображается большой текст — фона и блюра нет
             chatsHeader.style.background = 'rgba(20, 20, 25, 0)';
             chatsHeader.style.backdropFilter = 'blur(0px) saturate(100%)';
             chatsHeader.style.webkitBackdropFilter = 'blur(0px) saturate(100%)';
             chatsHeader.style.borderColor = 'rgba(255, 255, 255, 0)';
         }
 
-        // 2. Эффект Motion Blur при размытии большого текста в скролле
         largeTitle.style.opacity = `${1 - progress}`;
         largeTitle.style.filter = `blur(${progress * 12}px)`;
         largeTitle.style.transform = `translateY(${ -progress * 8 }px)`;
 
-        // 3. Эффект Motion Blur при появлении центрального текста в шапке — единый контролируемый блок
         compactTitle.style.opacity = `${progress}`;
         compactTitle.style.filter = `blur(${(1 - progress) * 12}px)`;
-        // Небольшой сдвиг вверх при появлении для ощущения движения (motion)
         compactTitle.style.transform = `translate(-50%, calc(-50% - ${progress * 6}px))`;
     });
 
-    // Функция отрисовки иконки
     function getAvatarSVG() {
         return `<svg><use href="#ios-avatar-icon"/></svg>`;
     }
 
-    // Рендер списка чатов
     function renderChatList() {
         const chatsItemsWrapper = document.getElementById('chatsItemsWrapper');
         if (!chatsItemsWrapper) return;
@@ -1424,7 +1398,6 @@
         });
     }
 
-    // Открытие чата
     function openChat(chatId) {
         const chat = chatsData.find(c => c.id === chatId);
         if (!chat) return;
@@ -1440,7 +1413,7 @@
         chatHeaderAvatar.innerHTML = getAvatarSVG();
         profileAvatar.innerHTML = getAvatarSVG();
 
-        if (chat.id === '7000') {
+        if (chat.id === '7000' || chat.id === '7001') {
             toggleNumberTitle.style.pointerEvents = 'auto';
         } else {
             toggleNumberTitle.style.pointerEvents = 'none';
@@ -1453,24 +1426,18 @@
             </div>
         `;
 
-        // Если в исторических сообщениях нет timestamp, попытаться вывести его из chat.dateMeta
         if (Array.isArray(chat.messages) && chat.messages.length) {
-            // попытаемся распарсить dateMeta как базовую отметку времени для последнего сообщения
             const baseFromMeta = parseDateMeta(chat.dateMeta);
             const msgs = chat.messages;
-            // определяем базовую метку: либо из meta, либо существующая у последнего сообщения, либо сейчас
             const baseTs = baseFromMeta || (msgs[msgs.length - 1].timestamp || Date.now());
-            // назначаем timestamp последнему сообщению, если он отсутствует
             if (!msgs[msgs.length - 1].timestamp) msgs[msgs.length - 1].timestamp = baseTs;
-            // для предыдущих сообщений, если нет timestamp, проставляем смещения по 2 минуты назад
             for (let j = msgs.length - 2; j >= 0; j--) {
                 if (!msgs[j].timestamp) {
-                    msgs[j].timestamp = msgs[j + 1].timestamp - (2 * 60 * 1000); // 2 минуты раньше
+                    msgs[j].timestamp = msgs[j + 1].timestamp - (2 * 60 * 1000);
                 }
             }
         }
 
-        // Render messages and insert date dividers when gap >= 24 hours
         let prevTs = null;
         for (let i = 0; i < chat.messages.length; i++) {
             const m = chat.messages[i];
@@ -1514,16 +1481,12 @@
     });
 
     contactTrigger.addEventListener('click', () => {
-        // Animate chat sliding left while profile slides in from right at the same speed
-        // Clear inline transforms first to ensure smooth transition
         resetInlineStyles(profileScreen, chatScreen);
-        // Move chat left (partially hidden) and bring profile to active (from right)
         chatScreen.className = 'screen hidden-left';
         profileScreen.className = 'screen active';
     });
 
     backToChatFromProfile.addEventListener('click', () => {
-        // Reverse the animation: profile slides to the right, chat returns from left
         resetInlineStyles(profileScreen, chatScreen);
         profileScreen.className = 'screen hidden-right';
         chatScreen.className = 'screen active';
@@ -1531,25 +1494,20 @@
 
     toggleNumberTitle.addEventListener('click', () => {
         if (!currentChat) return;
-        // allow toggling display between 7000 and 7001 for chats that show numeric names
         const currName = String(currentChat.name || chatHeaderName.textContent || '');
         const newNum = currName === '7000' ? '7001' : '7000';
 
-        // update visible headers
         chatHeaderName.textContent = newNum;
         profileTitleName.textContent = newNum;
         profilePhoneNumber.textContent = newNum;
 
-        // persist the change to currentChat and chatsData so it remains after returning to list
         currentChat.name = newNum;
         const idx = chatsData.findIndex(c => c.id === currentChat.id);
         if (idx !== -1) chatsData[idx].name = newNum;
 
-        // re-render the chat list so the new name is visible there
         renderChatList();
     });
 
-    // Жесты свайпа назад
     let touchStartX = 0;
     let touchStartY = 0;
     let isSwiping = false;
@@ -1647,7 +1605,6 @@
         chatBody.scrollTop = chatBody.scrollHeight;
     }
 
-    // Parse common dateMeta formats (Russian month names or D.M.Y[Y]) into a timestamp (ms)
     function parseDateMeta(str) {
         if (!str || typeof str !== 'string') return null;
         str = str.trim();
@@ -1690,11 +1647,9 @@
             const day = date.getDate();
             const hh = String(date.getHours()).padStart(2, '0');
             const mm = String(date.getMinutes()).padStart(2, '0');
-            // Capitalize weekday first letter (e.g., 'ср' -> 'Ср') and format like: 'Ср, 19 авг., 10:11'
             const weekdayCap = weekday.charAt(0).toUpperCase() + weekday.slice(1);
             return `${weekdayCap}, ${day} ${month}, ${hh}:${mm}`;
         } catch (e) {
-            // fallback to DD.MM.YYYY
             const d = String(date.getDate()).padStart(2, '0');
             const m = String(date.getMonth() + 1).padStart(2, '0');
             const y = date.getFullYear();
@@ -1708,7 +1663,6 @@
         return `${h}:${m}`;
     }
 
-    // Helper to append a message object to DOM and insert a date divider when needed
     function appendMessageToDOM(m) {
         if (!currentChat) return;
         const idx = currentChat.messages.indexOf(m);
@@ -1761,7 +1715,6 @@
                     const startTimeStr = formatTime(ticketTime);
                     const endTimeStr = formatTime(afterHour);
 
-                    // Use first 4 digits from user's text as prefix for ticket number (if present)
                     const digits = (text.match(/\d+/g) || []).join('');
                     const prefix = digits.slice(0,4) || String(ticketCounter).slice(0,4);
                     const suffix = String(ticketCounter++).slice(prefix.length);
@@ -1779,7 +1732,6 @@
 
             }, 400);
         } else {
-            // ensure scroll if non-interactive
             scrollToBottom();
         }
     }
@@ -1789,7 +1741,6 @@
         if (e.key === 'Enter') sendMessage();
     });
 
-    // Pre-fill timestamps for historical chats so date-dividers work immediately
     function fillHistoricalTimestamps() {
         chatsData.forEach(chat => {
             if (Array.isArray(chat.messages) && chat.messages.length) {
@@ -1809,30 +1760,23 @@
     fillHistoricalTimestamps();
     renderChatList();
 
-    // Инициализация состояния шапки (установить правильный фон/блюр и заголовки)
     if (chatListContainer) chatListContainer.dispatchEvent(new Event('scroll'));
 
-    // Align compact title vertically with the edit and filter buttons
     function alignCompactTitleWithButtons() {
         if (!compactTitle || !editBtnEl || !chatsTopBar) return;
-        // Use the center of the edit button as the vertical anchor
         const topBarRect = chatsTopBar.getBoundingClientRect();
         const editRect = editBtnEl.getBoundingClientRect();
         const anchorCenter = editRect.top + editRect.height / 2;
-        const relative = anchorCenter - topBarRect.top; // px from top of top-bar
-        const verticalOffset = 6; // shift compact title slightly lower (px)
+        const relative = anchorCenter - topBarRect.top;
+        const verticalOffset = 6;
         compactTitle.style.top = `${relative + verticalOffset}px`;
     }
 
-    // Run alignment now and on resize (and also after fonts/layout settle)
     alignCompactTitleWithButtons();
     window.addEventListener('resize', alignCompactTitleWithButtons);
-    // small timeout to align after fonts load/layout
     setTimeout(alignCompactTitleWithButtons, 120);
 
-    // Show a small contextual menu with actions for a chat (delete / clear)
     function showChatActionsMenu(chat, itemEl, anchorEl) {
-        // remove existing menu
         const existing = document.querySelector('.chat-action-menu');
         if (existing) existing.remove();
 
@@ -1845,7 +1789,6 @@
         `;
         document.body.appendChild(menu);
 
-        // position menu near anchor
         const rect = anchorEl.getBoundingClientRect();
         menu.style.position = 'fixed';
         menu.style.left = Math.max(8, rect.left - 16) + 'px';
@@ -1855,7 +1798,6 @@
         menu.querySelector('.menu-btn.cancel').addEventListener('click', () => menu.remove());
 
         menu.querySelector('.delete-chat').addEventListener('click', () => {
-            // remove chat from chatsData and re-render
             const i = chatsData.findIndex(c => c.id === chat.id);
             if (i !== -1) chatsData.splice(i,1);
             menu.remove();
@@ -1868,7 +1810,6 @@
                 chatsData[i].messages = [];
                 chatsData[i].preview = '';
             }
-            // if currently open chat is this one, clear the body
             if (currentChat && currentChat.id === chat.id) {
                 currentChat.messages = [];
                 chatBody.innerHTML = '';
@@ -1877,14 +1818,12 @@
             renderChatList();
         });
 
-        // close on outside click
         setTimeout(() => {
             const onDoc = (ev) => { if (!menu.contains(ev.target) && !anchorEl.contains(ev.target)) { menu.remove(); document.removeEventListener('click', onDoc); } };
             document.addEventListener('click', onDoc);
         }, 10);
     }
 
-    // CSS for menu and swipe actions
     const styleEl = document.createElement('style');
     styleEl.textContent = `
         .swipe-actions{ position: absolute; left: 0; top: 0; bottom: 0; width: 84px; display:flex; align-items:center; justify-content:center; opacity: 0; transform: translateX(-8px); transition: opacity 160ms ease, transform 160ms ease; z-index: 1; }
