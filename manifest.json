@@ -1,0 +1,13 @@
+{
+  "name": "Сообщения",
+  "short_name": "Сообщения",
+  "description": "Приложение сообщений",
+  "lang": "ru",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "icons": []
+}
