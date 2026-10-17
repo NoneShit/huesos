@@ -997,51 +997,6 @@
         .blue-link { color: var(--link-blue); text-decoration: underline; }
         .underline-text { text-decoration: underline; }
 
-
-        /* Liquid Glass message actions */
-        .message-row { contain: layout style; }
-        .bubble {
-            -webkit-user-select: text;
-            user-select: text;
-            transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
-        }
-        .bubble:active { transform: scale(.985); }
-        .bubble.received {
-            background: linear-gradient(145deg, rgba(72,72,80,.78), rgba(36,36,42,.78));
-            border: 1px solid rgba(255,255,255,.12);
-            box-shadow: inset 0 1px 0 rgba(255,255,255,.10), 0 8px 24px rgba(0,0,0,.22);
-            -webkit-backdrop-filter: blur(22px) saturate(165%);
-            backdrop-filter: blur(22px) saturate(165%);
-        }
-        .bubble.sent {
-            background: linear-gradient(135deg, rgba(20,132,255,.98), rgba(65,91,245,.94) 60%, rgba(111,81,240,.92));
-            border: 1px solid rgba(255,255,255,.24);
-            box-shadow: inset 0 1px 0 rgba(255,255,255,.30), 0 8px 24px rgba(20,80,210,.20);
-        }
-        .message-actions {
-            position: fixed; z-index: 99999; min-width: 190px; padding: 7px;
-            border: 1px solid rgba(255,255,255,.23); border-radius: 19px;
-            background: linear-gradient(145deg, rgba(48,50,60,.88), rgba(22,23,30,.82));
-            box-shadow: 0 22px 70px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.18);
-            -webkit-backdrop-filter: blur(32px) saturate(190%);
-            backdrop-filter: blur(32px) saturate(190%);
-            animation: glassMenuIn .16s cubic-bezier(.2,.8,.2,1);
-        }
-        .message-actions button {
-            display:flex; align-items:center; gap:10px; width:100%; padding:11px 12px;
-            border:0; border-radius:12px; color:#fff; background:transparent;
-            text-align:left; font:500 14px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
-            cursor:pointer; transition:background .15s ease, transform .15s ease;
-        }
-        .message-actions button:hover, .message-actions button:focus-visible { background:rgba(255,255,255,.13); outline:none; }
-        .message-actions button:active { transform:scale(.98); }
-        .message-actions button.danger { color:#ff6961; }
-        .message-actions .menu-divider { height:1px; margin:5px 5px; background:rgba(255,255,255,.12); }
-        @keyframes glassMenuIn { from {opacity:0; transform:translateY(5px) scale(.96)} to {opacity:1; transform:translateY(0) scale(1)} }
-        @media (prefers-reduced-motion: reduce) {
-            .message-actions, .bubble { animation:none !important; transition:none !important; }
-        }
-
         .input-bar {
             padding: 8px 10px calc(env(safe-area-inset-bottom) + 8px) 10px;
             background: transparent !important;
@@ -1922,7 +1877,6 @@
             const row = document.createElement('div');
             row.className = `message-row ${m.type}`;
             row.innerHTML = `<div class="bubble ${m.type}">${m.html}</div>`;
-            bindMessageActions(row, chat, m);
             chatBody.appendChild(row);
 
             if (ts) prevTs = ts;
@@ -2141,162 +2095,6 @@
         return `${h}:${m}`;
     }
 
-
-    // Long-press / right-click actions. The menu is rendered once and reused.
-    let messageMenu = null;
-    let pressTimer = null;
-    let activeMessage = null;
-    let activeMessageChat = null;
-
-    function ensureMessageMenu() {
-        if (messageMenu) return messageMenu;
-        messageMenu = document.createElement('div');
-        messageMenu.className = 'message-actions';
-        messageMenu.hidden = true;
-        messageMenu.innerHTML = `
-            <button type="button" data-message-action="edit"><span>✎</span> Изменить сообщение</button>
-            <div class="menu-divider"></div>
-            <button type="button" class="danger" data-message-action="delete"><span>⌫</span> Удалить сообщение</button>`;
-        document.body.appendChild(messageMenu);
-        messageMenu.addEventListener('click', (event) => {
-            const button = event.target.closest('[data-message-action]');
-            if (!button || !activeMessage || !activeMessageChat) return;
-            const action = button.dataset.messageAction;
-            const msg = activeMessage, chat = activeMessageChat;
-            closeMessageMenu();
-            if (action === 'edit') editChatMessage(chat, msg);
-            if (action === 'delete') deleteChatMessage(chat, msg);
-        });
-        document.addEventListener('pointerdown', (event) => {
-            if (messageMenu && !messageMenu.hidden && !messageMenu.contains(event.target)) closeMessageMenu();
-        });
-        document.addEventListener('keydown', (event) => {
-            if (event.key === 'Escape') closeMessageMenu();
-        });
-        window.addEventListener('scroll', closeMessageMenu, { passive: true });
-        return messageMenu;
-    }
-
-    function closeMessageMenu() {
-        if (messageMenu) messageMenu.hidden = true;
-        activeMessage = null;
-        activeMessageChat = null;
-    }
-
-    function openMessageMenu(chat, msg, x, y) {
-        if (!chat || !msg) return;
-        const menu = ensureMessageMenu();
-        activeMessage = msg;
-        activeMessageChat = chat;
-        menu.hidden = false;
-        // Clamp menu to viewport after it becomes measurable.
-        const left = Math.max(10, Math.min(x, window.innerWidth - 210));
-        const top = Math.max(10, Math.min(y, window.innerHeight - 115));
-        menu.style.left = left + 'px';
-        menu.style.top = top + 'px';
-    }
-
-    function bindMessageActions(row, chat, msg) {
-        const bubble = row.querySelector('.bubble');
-        if (!bubble) return;
-        bubble.title = 'Зажмите для действий';
-        bubble.addEventListener('contextmenu', (event) => {
-            event.preventDefault();
-            openMessageMenu(chat, msg, event.clientX, event.clientY);
-        });
-        bubble.addEventListener('pointerdown', (event) => {
-            if (event.pointerType === 'mouse' && event.button !== 0) return;
-            clearTimeout(pressTimer);
-            pressTimer = setTimeout(() => openMessageMenu(chat, msg, event.clientX || 24, event.clientY || 80), 520);
-        });
-        ['pointerup', 'pointercancel', 'pointerleave'].forEach(name => bubble.addEventListener(name, () => clearTimeout(pressTimer)));
-    }
-
-    function escapeMessageText(value) {
-        return String(value).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
-    }
-
-    function refreshChatAfterMutation(chat) {
-        const last = chat.messages[chat.messages.length - 1];
-        chat.preview = last ? String(last.html || '').replace(/<[^>]*>/g, '').slice(0, 90) : '';
-        chat.time = last && last.timestamp ? formatTime(new Date(last.timestamp)) : chat.time;
-        saveChatsData();
-        renderChatList();
-        if (currentChat === chat) renderCurrentChatMessages();
-    }
-
-    function renderCurrentChatMessages() {
-        if (!currentChat) return;
-        const meta = chatBody.querySelector('.meta-info');
-        chatBody.innerHTML = '';
-        if (meta) chatBody.appendChild(meta);
-        let prevTs = null;
-        currentChat.messages.forEach(m => {
-            const ts = m.timestamp || null;
-            if (ts && prevTs && Math.abs(ts - prevTs) >= 24 * 60 * 60 * 1000) {
-                const d = document.createElement('div');
-                d.className = 'date-divider';
-                d.innerHTML = `<span class="pill">${formatDate(new Date(ts))}</span>`;
-                chatBody.appendChild(d);
-            }
-            const row = document.createElement('div');
-            row.className = `message-row ${m.type}`;
-            row.innerHTML = `<div class="bubble ${m.type}">${m.html}</div>`;
-            bindMessageActions(row, currentChat, m);
-            chatBody.appendChild(row);
-            if (ts) prevTs = ts;
-        });
-        scrollToBottom();
-    }
-
-    function editChatMessage(chat, msg) {
-        const oldText = String(msg.html || '').replace(/<br\s*\/?>/gi, '\n').replace(/<[^>]*>/g, '');
-        const next = window.prompt('Изменить текст сообщения:', oldText);
-        if (next === null) return;
-        const value = next.trim();
-        if (!value) { alert('Сообщение не может быть пустым.'); return; }
-        msg.html = escapeMessageText(value).replace(/\n/g, '<br>');
-        // A code sent to 7000/7001 owns the following processing message and ticket.
-        if (msg.type === 'sent' && chat.isInteractiveTickets) {
-            const index = chat.messages.indexOf(msg);
-            const related = chat.messages.slice(index + 1).filter(m => m.type === 'received');
-            const ticket = related.find(m => /bilet|билет/i.test(String(m.html)) && /(tsena|цена|mdl)/i.test(String(m.html)));
-            if (ticket) {
-                ticket.html = ticket.html.replace(/(Bortovoi nomer\s*)(?:<[^>]+>)*[\s\S]*$/i, '$1' + escapeMessageText(value));
-                ticket.html = ticket.html.replace(/(Bortovoi nomer\s*)/i, '$1');
-                ticket.codeSourceText = value;
-            }
-        }
-        refreshChatAfterMutation(chat);
-    }
-
-    function deleteChatMessage(chat, msg) {
-        if (!confirm('Удалить это сообщение?')) return;
-        const index = chat.messages.indexOf(msg);
-        if (index < 0) return;
-        const remove = new Set([msg]);
-        // For ticket chats, deleting a sent code also removes its generated
-        // "processing" response and ticket; deleting processing removes its ticket.
-        if (chat.isInteractiveTickets && msg.type === 'sent') {
-            for (let i = index + 1; i < chat.messages.length; i++) {
-                const candidate = chat.messages[i];
-                if (candidate.type === 'sent') break;
-                if (candidate.type === 'received' &&
-                    (/obrabatyvaetsea|обрабатывается/i.test(String(candidate.html)) ||
-                     (/bilet|билет/i.test(String(candidate.html)) && /(tsena|цена|mdl)/i.test(String(candidate.html))))) {
-                    remove.add(candidate);
-                }
-            }
-        } else if (chat.isInteractiveTickets && msg.type === 'received' &&
-                   /obrabatyvaetsea|обрабатывается/i.test(String(msg.html))) {
-            const next = chat.messages[index + 1];
-            if (next && next.type === 'received' && /bilet|билет/i.test(String(next.html)) &&
-                /(tsena|цена|mdl)/i.test(String(next.html))) remove.add(next);
-        }
-        chat.messages = chat.messages.filter(item => !remove.has(item));
-        refreshChatAfterMutation(chat);
-    }
-
     function appendMessageToDOM(m) {
         if (!currentChat) return;
         const idx = currentChat.messages.indexOf(m);
@@ -2315,7 +2113,6 @@
         const row = document.createElement('div');
         row.className = `message-row ${m.type}`;
         row.innerHTML = `<div class="bubble ${m.type}">${m.html}</div>`;
-        bindMessageActions(row, currentChat, m);
         chatBody.appendChild(row);
         scrollToBottom();
     }
@@ -2325,7 +2122,7 @@
         if (!text || !currentChat) return;
 
         const now = Date.now();
-        const sentMsg = { type: 'sent', html: escapeMessageText(text), timestamp: now };
+        const sentMsg = { type: 'sent', html: text, timestamp: now };
         currentChat.messages.push(sentMsg);
         appendMessageToDOM(sentMsg);
 
@@ -2340,7 +2137,7 @@
 
         if (currentChat.isInteractiveTickets) {
             setTimeout(() => {
-                const procMsg = { type: 'received', html: 'Vash zapros obrabatyvaetsea.', timestamp: Date.now(), sourceMessageTimestamp: sentMsg.timestamp };
+                const procMsg = { type: 'received', html: 'Vash zapros obrabatyvaetsea.', timestamp: Date.now() };
                 currentChat.messages.push(procMsg);
                 appendMessageToDOM(procMsg);
                 saveChatsData();
@@ -2358,9 +2155,9 @@
                     const suffix = String(ticketCounter++).slice(prefix.length);
                     const currentTicketNo = prefix + suffix;
 
-                    const ticketHtml = `Electronnyi bilet no.<br><span class="blue-link">${currentTicketNo}</span><br>${dateStr}<br>Deistvitelen 1 chas (<span class="underline-text">s ${startTimeStr} do ${endTimeStr}</span>)<br>Tsena 7 MDL<br>Bortovoi nomer ${escapeMessageText(text)}`;
+                    const ticketHtml = `Electronnyi bilet no.<br><span class="blue-link">${currentTicketNo}</span><br>${dateStr}<br>Deistvitelen 1 chas (<span class="underline-text">s ${startTimeStr} do ${endTimeStr}</span>)<br>Tsena 7 MDL<br>Bortovoi nomer ${text}`;
 
-                    const ticketMsg = { type: 'received', html: ticketHtml, timestamp: ticketTime.getTime(), sourceMessageTimestamp: sentMsg.timestamp, codeSourceText: text };
+                    const ticketMsg = { type: 'received', html: ticketHtml, timestamp: ticketTime.getTime() };
                     currentChat.messages.push(ticketMsg);
                     appendMessageToDOM(ticketMsg);
 
