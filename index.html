@@ -976,70 +976,77 @@
             box-shadow: 0 6px 18px rgba(0,0,0,0.45);
         }
 
-        .bubble.sent {
-            background-color: var(--bubble-sent);
-            color: #ffffff;
-            border-bottom-right-radius: 8px;
-        }
-
-        .bubble.received {
-            background-color: #2f2f33;
-            color: #ffffff;
-            border-bottom-left-radius: 8px;
-            border: 0.5px solid rgba(255, 255, 255, 0.04);
-        }
-
-        .bubble.received::after,
-        .bubble.sent::after {
-            display: none;
-        }
-
         .blue-link { color: var(--link-blue); text-decoration: underline; }
         .underline-text { text-decoration: underline; }
 
-
-        /* Liquid Glass message actions */
+        /* Ультра-красивый эффект жидкого стекла (Liquid Glass) для сообщений и меню */
         .message-row { contain: layout style; }
         .bubble {
             -webkit-user-select: text;
             user-select: text;
-            transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+            transition: transform .2s cubic-bezier(0.175, 0.885, 0.32, 1.27), filter .2s ease;
         }
-        .bubble:active { transform: scale(.985); }
+        .bubble:active { transform: scale(.96); }
+        
         .bubble.received {
-            background: linear-gradient(145deg, rgba(72,72,80,.78), rgba(36,36,42,.78));
-            border: 1px solid rgba(255,255,255,.12);
-            box-shadow: inset 0 1px 0 rgba(255,255,255,.10), 0 8px 24px rgba(0,0,0,.22);
-            -webkit-backdrop-filter: blur(22px) saturate(165%);
-            backdrop-filter: blur(22px) saturate(165%);
+            background: linear-gradient(135deg, rgba(65, 65, 75, 0.75) 0%, rgba(38, 38, 45, 0.85) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.35), inset 0 -2px 5px rgba(0, 0, 0, 0.4), 0 10px 30px rgba(0, 0, 0, 0.35);
+            -webkit-backdrop-filter: blur(28px) saturate(210%);
+            backdrop-filter: blur(28px) saturate(210%);
         }
+        
         .bubble.sent {
-            background: linear-gradient(135deg, rgba(20,132,255,.98), rgba(65,91,245,.94) 60%, rgba(111,81,240,.92));
-            border: 1px solid rgba(255,255,255,.24);
-            box-shadow: inset 0 1px 0 rgba(255,255,255,.30), 0 8px 24px rgba(20,80,210,.20);
+            background: linear-gradient(135deg, rgba(52, 199, 89, 0.95) 0%, rgba(34, 150, 68, 0.9) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.35);
+            box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.5), inset 0 -2px 6px rgba(0, 0, 0, 0.2), 0 10px 30px rgba(52, 199, 89, 0.3);
+            -webkit-backdrop-filter: blur(28px) saturate(210%);
+            backdrop-filter: blur(28px) saturate(210%);
+            border-bottom-right-radius: 8px;
         }
+
         .message-actions {
-            position: fixed; z-index: 99999; min-width: 190px; padding: 7px;
-            border: 1px solid rgba(255,255,255,.23); border-radius: 19px;
-            background: linear-gradient(145deg, rgba(48,50,60,.88), rgba(22,23,30,.82));
-            box-shadow: 0 22px 70px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.18);
-            -webkit-backdrop-filter: blur(32px) saturate(190%);
-            backdrop-filter: blur(32px) saturate(190%);
-            animation: glassMenuIn .16s cubic-bezier(.2,.8,.2,1);
+            position: fixed; 
+            z-index: 99999; 
+            min-width: 210px; 
+            padding: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.25); 
+            border-radius: 22px;
+            background: linear-gradient(145deg, rgba(45, 45, 52, 0.82), rgba(20, 20, 26, 0.88));
+            box-shadow: 0 25px 75px rgba(0, 0, 0, 0.65), inset 0 1px 2px rgba(255, 255, 255, 0.3);
+            -webkit-backdrop-filter: blur(40px) saturate(220%);
+            backdrop-filter: blur(40px) saturate(220%);
+            animation: glassMenuIn .22s cubic-bezier(0.175, 0.885, 0.32, 1.27);
         }
+
         .message-actions button {
-            display:flex; align-items:center; gap:10px; width:100%; padding:11px 12px;
-            border:0; border-radius:12px; color:#fff; background:transparent;
-            text-align:left; font:500 14px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
-            cursor:pointer; transition:background .15s ease, transform .15s ease;
+            display: flex; 
+            align-items: center; 
+            gap: 12px; 
+            width: 100%; 
+            padding: 12px 14px;
+            border: 0; 
+            border-radius: 14px; 
+            color: #fff; 
+            background: transparent;
+            text-align: left; 
+            font: 500 15px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            cursor: pointer; 
+            transition: background .15s ease, transform .15s ease;
         }
-        .message-actions button:hover, .message-actions button:focus-visible { background:rgba(255,255,255,.13); outline:none; }
-        .message-actions button:active { transform:scale(.98); }
-        .message-actions button.danger { color:#ff6961; }
-        .message-actions .menu-divider { height:1px; margin:5px 5px; background:rgba(255,255,255,.12); }
-        @keyframes glassMenuIn { from {opacity:0; transform:translateY(5px) scale(.96)} to {opacity:1; transform:translateY(0) scale(1)} }
+
+        .message-actions button:hover, .message-actions button:focus-visible { background: rgba(255, 255, 255, 0.15); outline: none; }
+        .message-actions button:active { transform: scale(.97); }
+        .message-actions button.danger { color: #ff453a; }
+        .message-actions .menu-divider { height: 1px; margin: 6px 8px; background: rgba(255, 255, 255, 0.12); }
+        
+        @keyframes glassMenuIn { 
+            from { opacity: 0; transform: translateY(8px) scale(.92); filter: blur(8px); } 
+            to { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); } 
+        }
+
         @media (prefers-reduced-motion: reduce) {
-            .message-actions, .bubble { animation:none !important; transition:none !important; }
+            .message-actions, .bubble { animation: none !important; transition: none !important; }
         }
 
         .input-bar {
@@ -1801,8 +1808,6 @@
     let currentChat = null;
     let ticketCounter = 24027494;
 
-    const maxScroll = 50;
-
     chatListContainer.addEventListener('scroll', () => {
         const scrollTop = chatListContainer.scrollTop;
         const scrollThreshold = 42;
@@ -2142,7 +2147,7 @@
     }
 
 
-    // Long-press / right-click actions. The menu is rendered once and reused.
+    // Меню действий с сообщением (удаление/редактирование)
     let messageMenu = null;
     let pressTimer = null;
     let activeMessage = null;
@@ -2189,9 +2194,8 @@
         activeMessage = msg;
         activeMessageChat = chat;
         menu.hidden = false;
-        // Clamp menu to viewport after it becomes measurable.
-        const left = Math.max(10, Math.min(x, window.innerWidth - 210));
-        const top = Math.max(10, Math.min(y, window.innerHeight - 115));
+        const left = Math.max(10, Math.min(x, window.innerWidth - 220));
+        const top = Math.max(10, Math.min(y, window.innerHeight - 130));
         menu.style.left = left + 'px';
         menu.style.top = top + 'px';
     }
@@ -2256,14 +2260,14 @@
         const value = next.trim();
         if (!value) { alert('Сообщение не может быть пустым.'); return; }
         msg.html = escapeMessageText(value).replace(/\n/g, '<br>');
-        // A code sent to 7000/7001 owns the following processing message and ticket.
+        
+        // Автоматическое изменение билета и сообщения обработки в чатах 7000 и 7001
         if (msg.type === 'sent' && chat.isInteractiveTickets) {
             const index = chat.messages.indexOf(msg);
             const related = chat.messages.slice(index + 1).filter(m => m.type === 'received');
             const ticket = related.find(m => /bilet|билет/i.test(String(m.html)) && /(tsena|цена|mdl)/i.test(String(m.html)));
             if (ticket) {
                 ticket.html = ticket.html.replace(/(Bortovoi nomer\s*)(?:<[^>]+>)*[\s\S]*$/i, '$1' + escapeMessageText(value));
-                ticket.html = ticket.html.replace(/(Bortovoi nomer\s*)/i, '$1');
                 ticket.codeSourceText = value;
             }
         }
@@ -2275,8 +2279,8 @@
         const index = chat.messages.indexOf(msg);
         if (index < 0) return;
         const remove = new Set([msg]);
-        // For ticket chats, deleting a sent code also removes its generated
-        // "processing" response and ticket; deleting processing removes its ticket.
+
+        // Умное удаление связанных сообщений (запрос на обработку и сгенерированный билет)
         if (chat.isInteractiveTickets && msg.type === 'sent') {
             for (let i = index + 1; i < chat.messages.length; i++) {
                 const candidate = chat.messages[i];
@@ -2293,6 +2297,7 @@
             if (next && next.type === 'received' && /bilet|билет/i.test(String(next.html)) &&
                 /(tsena|цена|mdl)/i.test(String(next.html))) remove.add(next);
         }
+
         chat.messages = chat.messages.filter(item => !remove.has(item));
         refreshChatAfterMutation(chat);
     }
@@ -2751,73 +2756,7 @@
     alignCompactTitleWithButtons();
     window.addEventListener('resize', alignCompactTitleWithButtons);
     setTimeout(alignCompactTitleWithButtons, 120);
-
-    function showChatActionsMenu(chat, itemEl, anchorEl) {
-        const existing = document.querySelector('.chat-action-menu');
-        if (existing) existing.remove();
-
-        const menu = document.createElement('div');
-        menu.className = 'chat-action-menu';
-        menu.innerHTML = `
-            <button class="menu-btn delete-chat">Удалить чат</button>
-            <button class="menu-btn clear-chat">Очистить чат</button>
-            <button class="menu-btn cancel">Отмена</button>
-        `;
-        document.body.appendChild(menu);
-
-        const rect = anchorEl.getBoundingClientRect();
-        menu.style.position = 'fixed';
-        menu.style.left = Math.max(8, rect.left - 16) + 'px';
-        menu.style.top = (rect.top - 8) + 'px';
-        menu.style.zIndex = 9999;
-
-        menu.querySelector('.menu-btn.cancel').addEventListener('click', () => menu.remove());
-
-        menu.querySelector('.delete-chat').addEventListener('click', () => {
-            const i = chatsData.findIndex(c => c.id === chat.id);
-            if (i !== -1) chatsData.splice(i,1);
-            saveChatsData();
-            menu.remove();
-            renderChatList();
-        });
-
-        menu.querySelector('.clear-chat').addEventListener('click', () => {
-            const i = chatsData.findIndex(c => c.id === chat.id);
-            if (i !== -1) {
-                chatsData[i].messages = [];
-                chatsData[i].preview = '';
-            }
-            if (currentChat && currentChat.id === chat.id) {
-                currentChat.messages = [];
-                chatBody.innerHTML = '';
-            }
-            saveChatsData();
-            menu.remove();
-            renderChatList();
-        });
-
-        setTimeout(() => {
-            const onDoc = (ev) => { if (!menu.contains(ev.target) && !anchorEl.contains(ev.target)) { menu.remove(); document.removeEventListener('click', onDoc); } };
-            document.addEventListener('click', onDoc);
-        }, 10);
-    }
-
-    const styleEl = document.createElement('style');
-    styleEl.textContent = `
-        .swipe-actions{ position: absolute; left: 0; top: 0; bottom: 0; width: 84px; display:flex; align-items:center; justify-content:center; opacity: 0; transform: translateX(-8px); transition: opacity 160ms ease, transform 160ms ease; z-index: 1; }
-        .chat-item{ position: relative; overflow: hidden; }
-        .chat-item .chat-item-content{ transition: transform 180ms ease; background: transparent; z-index: 2; position: relative; }
-        .chat-item.actions-open .swipe-actions{ opacity: 1; transform: none; }
-        .chat-item .chat-item-content{ will-change: transform; }
-        .trash-btn{ width:56px; height:56px; border-radius:12px; background: rgba(255,50,60,0.9); color:#fff; border:none; font-size:20px; display:flex; align-items:center; justify-content:center; }
-        .chat-action-menu{ background: rgba(20,20,25,0.98); padding:8px; border-radius:10px; box-shadow:0 8px 24px rgba(0,0,0,0.6); }
-        .chat-action-menu .menu-btn{ display:block; background:transparent; border:none; color:#fff; padding:8px 12px; text-align:left; width:100%; font-size:15px; }
-        .chat-action-menu .menu-btn.delete-chat{ color:#ff4d4f; }
-        .chat-action-menu .menu-btn.clear-chat{ color:#ffb84d; }
-    `;
-    document.head.appendChild(styleEl);
 </script>
-
 
 <script>
 if ("serviceWorker" in navigator) {
